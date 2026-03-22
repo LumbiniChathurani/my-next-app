@@ -3,6 +3,7 @@ name: Fetch IQAir Hourly
 on:
   schedule:
     - cron: "0 * * * *"  # every hour
+  workflow_dispatch:     # ✅ allows manual run
 
 jobs:
   run-script:

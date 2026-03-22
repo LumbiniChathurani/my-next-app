@@ -2,7 +2,8 @@ name: Calculate Daily AQI
 
 on:
   schedule:
-    - cron: "59 23 * * *"  # 11:59 PM
+    - cron: "59 23 * * *"  # 11:59 PM (UTC)
+  workflow_dispatch:       # ✅ allows manual run
 
 jobs:
   run-script:
