@@ -26,24 +26,47 @@ async function fetchIQAir() {
         continue;
       }
 
-      const aqiData = {
-        station_name: place.city,
+      // 🔹 Station object (STATIC DATA)
+      const station = {
         station_id: `iqair_${place.city.toLowerCase().replace(/\s+/g, "_")}`,
-        aqi: data.data.current.pollution.aqius,
+        station_name: place.city,
+        source: "iqair",
         lat: data.data.location.coordinates[1],
         lon: data.data.location.coordinates[0],
       };
 
-      console.log("Saving (TEMP):", aqiData);
+      // 🔹 AQI value (DYNAMIC DATA)
+      const aqi = data.data.current.pollution.aqius;
 
-      const { error } = await supabase
-        .from("aq_hourly_temp") // ✅ CHANGED
-        .insert([aqiData]);
+      console.log("Processing:", station.station_name);
 
-      if (error) {
-        console.error(`Insert Error (${place.city}):`, error);
+      // ✅ 1. UPSERT station
+      const { error: stationError } = await supabase
+        .from("stations")
+        .upsert([station], {
+          onConflict: "station_id"
+        });
+
+      if (stationError) {
+        console.error(`Station Error (${place.city}):`, stationError);
+        continue;
+      }
+
+      // ✅ 2. INSERT AQI reading
+      const { error: aqiError } = await supabase
+        .from("aq_hourly_temp")
+        .insert([
+          {
+            station_id: station.station_id,
+            aqi: aqi,
+            timestamp: new Date().toISOString()
+          }
+        ]);
+
+      if (aqiError) {
+        console.error(`AQI Insert Error (${place.city}):`, aqiError);
       } else {
-        console.log(`✅ ${place.city} saved to temp`);
+        console.log(`✅ ${place.city} AQI saved`);
       }
 
     } catch (error) {
