@@ -15,13 +15,13 @@ async function calculateDailyAverage() {
   console.log("Daily averages inserted:", data);
 
   // 2. Clear temp table
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   
   const { error: deleteError } = await supabase
     .from("aq_hourly_temp")
     .delete()
-    .lt("timestamp", yesterday.toISOString());
+    .lt("timestamp", sevenDaysAgo.toISOString());
 
   if (deleteError) {
     console.error("Error clearing temp table:", deleteError);

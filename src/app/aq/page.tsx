@@ -23,7 +23,7 @@ type SupabaseReading = {
     station_name: string;
     lat: number;
     lon: number;
-  }[];
+  };
 };
 
 export default function Home() {
@@ -61,13 +61,13 @@ export default function Home() {
       console.log("RAW DATA:", data); // debug
 
       // ✅ Safe mapping (avoid crashes if stations is empty)
-      const formatted: Reading[] = (data as SupabaseReading[])
-        .filter((r) => r.stations && r.stations.length > 0)
-        .map((r) => ({
-          aqi: r.aqi,
-          date: r.date,
-          stations: r.stations[0],
-        }));
+      const formatted: Reading[] = (data as any[])
+      .filter((r) => r.stations) // just check exists
+      .map((r) => ({
+        aqi: r.aqi,
+        date: r.date,
+        stations: r.stations, // no [0]
+      }));
 
       setReadings(formatted);
       setLoading(false);
