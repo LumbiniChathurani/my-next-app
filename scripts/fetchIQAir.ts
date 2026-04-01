@@ -3,6 +3,8 @@ import { supabase } from "./supabaseClient";
 
 const API_KEY = process.env.IQAIR_API_KEY;
 
+const sleep = (ms: number) => new Promise(res => setTimeout(res, ms));
+
 const cities = [
   // Central Province
   { city: "Akurana", state: "Central", country: "Sri Lanka" },
@@ -97,6 +99,7 @@ async function fetchIQAir() {
     } catch (error) {
       console.error(`Error (${place.city}):`, error);
     }
+    await sleep(2000); // wait 2 seconds before next request
   }
 
   const { data: joinData, error: joinError } = await supabase
