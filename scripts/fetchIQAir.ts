@@ -99,7 +99,7 @@ async function fetchIQAir() {
     } catch (error) {
       console.error(`Error (${place.city}):`, error);
     }
-    await sleep(2000); // wait 2 seconds before next request
+    await sleep(4000); // wait 2 seconds before next request
   }
 
   const { data: joinData, error: joinError } = await supabase
