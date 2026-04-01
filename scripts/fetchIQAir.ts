@@ -43,7 +43,7 @@ const cities = [
 async function fetchIQAir() {
   for (const place of cities) {
     try {
-      const url = `http://api.airvisual.com/v2/city?city=${place.city}&state=${place.state}&country=${place.country}&key=${API_KEY}`;
+      const url = `http://api.airvisual.com/v2/nearest_city?lat=${place.lat}&lon=${place.lon}&key=${API_KEY}`;
 
       let data: any = await fetchWithRetry(url);
 
