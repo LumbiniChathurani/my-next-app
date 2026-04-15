@@ -1,6 +1,8 @@
 // /components/AQITable.tsx
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 type Reading = {
   aqi: number;
   date: string;
@@ -16,6 +18,11 @@ type AQITableProps = {
 };
 
 export default function AQITable({ readings }: AQITableProps) {
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
   // 1. Get unique dates sorted (oldest first)
   const dates = Array.from(new Set(readings.map((r) => r.date))).sort(
     (a, b) => new Date(a).getTime() - new Date(b).getTime()
@@ -34,6 +41,28 @@ export default function AQITable({ readings }: AQITableProps) {
   });
 
   const weeklyAvgMap: Record<string, number> = {};
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (!containerRef.current || !tableRef.current) return;
+  
+      const containerWidth = containerRef.current.offsetWidth;
+  
+      // ✅ FIX: use real rendered width
+      const tableWidth = tableRef.current.getBoundingClientRect().width;
+  
+      // ✅ Add correction factor
+      const newScale = (containerWidth / tableWidth) * 0.95;
+  
+      // ✅ Clamp scale
+      setScale(Math.max(0.4, Math.min(newScale, 1)));
+    };
+  
+    updateScale();
+    window.addEventListener("resize", updateScale);
+  
+    return () => window.removeEventListener("resize", updateScale);
+  }, []);
 
 stations.forEach((station) => {
   let sum = 0;
@@ -99,8 +128,17 @@ const dateRange =
 
   return (
     <div className="p-4 flex justify-center">
-  <div className="w-fit">
-<div className="p-4 overflow-x-auto">
+  <div className="w-full">
+
+  <div ref={containerRef} className="w-full flex justify-center overflow-hidden">
+  <div
+  ref={tableRef}
+  style={{
+    transform: `scale(${scale})`,
+    transformOrigin: "top center",
+    width: "fit-content", // ✅ important
+  }}
+>
 
 <h3 className="text-xl font-bold mb-4 text-cyan-600 flex justify-center">
   Weekly Air Quality Card
@@ -110,7 +148,7 @@ const dateRange =
   {dateRange}
 </div>
 
-  <table className="table-fixed border border-collapse text-xs bg-slate-100">
+<table className="table-fixed border border-collapse text-[10px] sm:text-xs bg-slate-100 min-w-max">
     <thead>
       <tr>
         <th className="border p-2 w-40">Station / Date</th>
@@ -240,9 +278,13 @@ const dateRange =
   ))}
 </div>
 
+
+  </div>
 </div>
 
 </div>
+
+
 </div>
   );
 }

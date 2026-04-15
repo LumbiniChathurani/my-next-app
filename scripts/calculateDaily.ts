@@ -30,4 +30,4 @@ async function calculateDailyAverage() {
   }
 }
 
-calculateDailyAverage();
+calculateDailyAverage(); 
