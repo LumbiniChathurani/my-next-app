@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+/* import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 Deno.serve(async () => {
   const supabase = createClient(
@@ -32,4 +32,4 @@ Deno.serve(async () => {
     console.error(err);
     return new Response("Error");
   }
-});
+});  */
