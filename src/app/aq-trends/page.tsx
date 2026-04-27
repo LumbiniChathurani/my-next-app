@@ -62,7 +62,7 @@ export default function AQTrendsPage() {
   }, []);
 
   return (
-    <div className="p-10 max-w-4xl mx-auto bg-slate-100 rounded-lg">
+    <div className="p-10 max-w-4xl mx-auto bg-slate-100 rounded-lg h-96">
   
       {/* Title */}
       <h1 className="text-2xl font-bold text-center mb-10">
@@ -100,7 +100,7 @@ export default function AQTrendsPage() {
   
         <button
           onClick={fetchChartData}
-          className="bg-blue-600 text-white px-6 py-2 rounded"
+          className="bg-blue-600 text-black px-6 py-2 rounded"
         >
           Generate Chart
         </button>

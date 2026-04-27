@@ -2,8 +2,6 @@ import 'dotenv/config';
 import { supabase } from "./supabaseClient";
 
 async function calculateDailyAverage() {
-  const today = new Date().toISOString().split("T")[0];
-
   // 1. Get averages
   const { data, error } = await supabase.rpc("calculate_daily_avg");
 
@@ -13,21 +11,6 @@ async function calculateDailyAverage() {
   }
 
   console.log("Daily averages inserted:", data);
-
-  // 2. Clear temp table
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  
-  const { error: deleteError } = await supabase
-    .from("aq_hourly_temp")
-    .delete()
-    .lt("timestamp", sevenDaysAgo.toISOString());
-
-  if (deleteError) {
-    console.error("Error clearing temp table:", deleteError);
-  } else {
-    console.log("Temp table cleared");
-  }
 }
 
-calculateDailyAverage(); 
+calculateDailyAverage();
