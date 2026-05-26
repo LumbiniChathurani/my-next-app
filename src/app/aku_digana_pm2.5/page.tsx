@@ -4,27 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import AQDataViewer from "../../../components/AQDataViewer";
 
-//BY FN 25.5.2026
-const [theme, setTheme] = useState<"light" | "dark">("light");
-const colors = {
-  light: {
-    background: "#f3f4f6",
-    card: "#ffffff",
-    text: "#1f2937",
-    subtext: "#6b7280",
-    border: "#e5e7eb",
-  },
-
-  dark: {
-    background: "#111827",
-    card: "#1f2937",
-    text: "#f9fafb",
-    subtext: "#9ca3af",
-    border: "#374151",
-  },
-};
-const currentTheme = colors[theme];
-//end FN
 type StationKey =
   | "akurana_av_outdoor"
   | "digana"
@@ -185,28 +164,6 @@ export default function AQTrendsPage() {
           <p style={{ fontSize: "14px", color: "#9ca3af", margin: 0 }}>
             Akurana &amp; Digana Monitoring Stations
           </p>
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-  <button
-    onClick={() =>
-      setTheme(theme === "light" ? "dark" : "light")
-    }
-    style={{
-      padding: "8px 16px",
-      borderRadius: "10px",
-      border: "none",
-      cursor: "pointer",
-      fontWeight: "600",
-      backgroundColor:
-        theme === "light" ? "#111827" : "#ffffff",
-      color:
-        theme === "light" ? "#ffffff" : "#111827",
-    }}
-  >
-    {theme === "light"
-      ? "🌙 Dark Theme"
-      : "☀️ Light Theme"}
-  </button>
-</div>
         </div>
 
         {/* Latest Cards */}
