@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "../../../lib/supabaseClient";
+import { supabase_2 } from "../../../lib/supabaseClient";
 import AQDataViewer from "../../../components/AQDataViewer";
 
 type StationKey =
@@ -63,7 +63,7 @@ export default function AQTrendsPage() {
 
   useEffect(() => {
     const fetchLatest = async () => {
-      const { data, error } = await supabase
+      const { data, error } = await supabase_2
         .from("aq_data_akurana_digana")
         .select("date, akurana_av_outdoor, digana, akurana_pa, akurana_av_downstairs")
         .order("date", { ascending: false })
@@ -89,7 +89,7 @@ export default function AQTrendsPage() {
     }
     setLoading(true);
 
-    const { data, error } = await supabase
+    const { data, error } = await supabase_2
       .from("aq_data_akurana_digana")
       .select("date, akurana_av_outdoor, digana, akurana_pa, akurana_av_downstairs")
       .gte("date", fromDate)
