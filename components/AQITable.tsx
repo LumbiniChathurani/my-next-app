@@ -24,7 +24,6 @@ export default function AQITable({ readings }: AQITableProps) {
   const downloadImage = async () => {
     if (!tableRef.current) return;
   
-    // Hide buttons before capture
     const buttons = tableRef.current.querySelectorAll("button");
     buttons.forEach((btn) => (btn.style.display = "none"));
   
@@ -33,7 +32,6 @@ export default function AQITable({ readings }: AQITableProps) {
       pixelRatio: 2,
     });
   
-    // Restore buttons
     buttons.forEach((btn) => (btn.style.display = "block"));
   
     const link = document.createElement("a");
@@ -46,21 +44,18 @@ export default function AQITable({ readings }: AQITableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
-  // 1. Get unique dates sorted (oldest first)
   const dates = Array.from(new Set(readings.map((r) => r.date))).sort(
     (a, b) => new Date(a).getTime() - new Date(b).getTime()
   );
 
-  // 2. Get unique station names
   const stations = Array.from(
     new Set(readings.map((r) => r.stations.station_name))
   );
 
-  // 3. Create lookup map for AQI
   const dataMap: Record<string, number> = {};
   readings.forEach((r) => {
     const key = `${r.stations.station_name}-${r.date}`;
-    dataMap[key] = Math.round(r.aqi); // round AQI
+    dataMap[key] = Math.round(r.aqi);
   });
 
   const weeklyAvgMap: Record<string, number> = {};
@@ -70,56 +65,48 @@ export default function AQITable({ readings }: AQITableProps) {
       if (!containerRef.current || !tableRef.current) return;
   
       const containerWidth = containerRef.current.offsetWidth;
-  
-      // ✅ FIX: use real rendered width
       const tableWidth = tableRef.current.getBoundingClientRect().width;
-  
-      // ✅ Add correction factor
       const newScale = (containerWidth / tableWidth) * 0.95;
-  
-      // ✅ Clamp scale
       setScale(Math.max(0.4, Math.min(newScale, 1)));
     };
   
     updateScale();
     window.addEventListener("resize", updateScale);
-  
     return () => window.removeEventListener("resize", updateScale);
   }, []);
 
-stations.forEach((station) => {
-  let sum = 0;
-  let count = 0;
+  stations.forEach((station) => {
+    let sum = 0;
+    let count = 0;
+
+    dates.forEach((date) => {
+      const key = `${station}-${date}`;
+      if (dataMap[key] !== undefined) {
+        sum += dataMap[key];
+        count++;
+      }
+    });
+
+    weeklyAvgMap[station] = count > 0 ? Math.round(sum / count) : 0;
+  });
+
+  const dailyAvgMap: Record<string, number> = {};
 
   dates.forEach((date) => {
-    const key = `${station}-${date}`;
-    if (dataMap[key] !== undefined) {
-      sum += dataMap[key];
-      count++;
-    }
+    let sum = 0;
+    let count = 0;
+
+    stations.forEach((station) => {
+      const key = `${station}-${date}`;
+      if (dataMap[key] !== undefined) {
+        sum += dataMap[key];
+        count++;
+      }
+    });
+
+    dailyAvgMap[date] = count > 0 ? Math.round(sum / count) : 0;
   });
 
-  weeklyAvgMap[station] = count > 0 ? Math.round(sum / count) : 0;
-});
-
-const dailyAvgMap: Record<string, number> = {};
-
-dates.forEach((date) => {
-  let sum = 0;
-  let count = 0;
-
-  stations.forEach((station) => {
-    const key = `${station}-${date}`;
-    if (dataMap[key] !== undefined) {
-      sum += dataMap[key];
-      count++;
-    }
-  });
-
-  dailyAvgMap[date] = count > 0 ? Math.round(sum / count) : 0;
-});
-
-  // 4. Color function (reuse AQCard logic)
   const getColorClass = (aqi: number) => {
     if (aqi <= 50) return 'bg-green-600';
     if (aqi <= 100) return '#FFEA00';
@@ -139,182 +126,217 @@ dates.forEach((date) => {
   ];
 
   const formatDate = (date: string) =>
-  new Date(date).toLocaleDateString('en-US', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-  });
-const dateRange =
-  dates.length > 0
-    ? `${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`
-    : '';
+    new Date(date).toLocaleDateString('en-US', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+
+  const dateRange =
+    dates.length > 0
+      ? `${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`
+      : '';
 
   return (
-    <div className="p-4 flex justify-center">
-  <div className="w-full">
+    <div className="p-4 flex flex-col items-center">
+      <div className="w-full">
 
-  <div ref={containerRef} className="w-full flex justify-center overflow-hidden">
-  <div
-  ref={tableRef}
-  style={{
-    transform: `scale(${scale})`,
-    transformOrigin: "top center",
-    width: "fit-content", // ✅ important
-  }}
->
-
-<h3 className="text-xl font-bold mb-4 text-cyan-600 flex justify-center">
-  Weekly Air Quality Card
-</h3>
-
-<div className="mb-4 inline-block bg-slate-100 border-cyan-600 border-2 text-cyan-700 px-4 py-2 rounded-md text-sm font-medium">
-  {dateRange}
-</div>
-
-<table className="table-fixed border border-collapse text-[10px] sm:text-xs bg-slate-100 min-w-max">
-    <thead>
-      <tr>
-        <th className="border p-2 w-40">Station / Date</th>
-
-        {dates.map((date) => (
-          <th key={date} className="border p-2 w-24">
-            {new Date(date).toLocaleDateString()}
-          </th>
-        ))}
-
-       {/* GAP */}
-  <th className="w-6"></th>
-
-{/* Weekly Average Header */}
-<th className="border p-2 w-32">Weekly AQI</th>
-
-      </tr>
-    </thead>
-
-    <tbody>
-  {/* Station Rows */}
-  {stations.map((station) => (
-    <tr key={station}>
-      {/* Station Name */}
-      <td className="border p-2 font-bold w-40">
-        {station}
-      </td>
-
-      {/* Daily AQI Cells */}
-      {dates.map((date) => {
-        const key = `${station}-${date}`;
-        return (
-          <td
-            key={key}
-            className={`border text-center w-24 ${
-              dataMap[key] === undefined
-                ? 'bg-gray-600'
-                : !getColorClass(dataMap[key]).startsWith('#')
-                ? getColorClass(dataMap[key])
-                : ''
-            }`}
-            style={
-              dataMap[key] !== undefined &&
-              getColorClass(dataMap[key]).startsWith('#')
-                ? { backgroundColor: getColorClass(dataMap[key]) }
-                : {}
-            }
+        {/* ✅ containerRef: flex + items-center to center the scaled table */}
+        <div ref={containerRef} className="w-full flex flex-col items-center overflow-hidden">
+          <div
+            ref={tableRef}
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: "top center",
+              width: "fit-content",
+              margin: "0 auto",
+            }}
           >
-            {dataMap[key] ?? '-'}
-          </td>
-        );
-      })}
+            <h3 className="text-xl font-bold mb-4 text-cyan-600 text-center">
+              Weekly Air Quality Card
+            </h3>
 
-      {/* GAP */}
-      <td className="w-6"></td>
+            {/* ✅ Date range centered */}
+            <div className="flex ml-36 mb-4">
+              <div className="inline-block bg-slate-100 border-cyan-600 border-2 text-cyan-700 px-4 py-2 rounded-md text-sm font-medium">
+                {dateRange}
+              </div>
+            </div>
 
-      {/* Weekly Average */}
-      <td
-        className={`border text-center w-32 font-semibold ${
-          weeklyAvgMap[station] === 0
-            ? 'bg-gray-600'
-            : !getColorClass(weeklyAvgMap[station]).startsWith('#')
-            ? getColorClass(weeklyAvgMap[station])
-            : ''
-        }`}
-        style={
-          weeklyAvgMap[station] !== 0 &&
-          getColorClass(weeklyAvgMap[station]).startsWith('#')
-            ? { backgroundColor: getColorClass(weeklyAvgMap[station]) }
-            : {}
-        }
-      >
-        {weeklyAvgMap[station] || '-'}
-      </td>
-    </tr>
-  ))}
+            {/* ✅ Table centered */}
+            <div className="flex justify-center">
+              <table className="table-fixed border border-collapse text-[10px] bg-slate-100 min-w-max">
+                <thead>
+                  <tr>
+                    {/* Station column */}
+                    <th className="border p-2 w-32 text-left align-bottom">Station / Date</th>
 
-  {/* GAP ROW */}
-  <tr>
-    <td colSpan={dates.length + 3} className="h-4"></td>
-  </tr>
+                    {/* Date header cells — rotated 45deg */}
+                    {dates.map((date) => (
+                      <th
+                        key={date}
+                        className="border w-10 h-16 text-center align-bottom overflow-visible"
+                      >
+                        <div
+                          style={{
+                            transform: "rotate(-45deg)",
+                            transformOrigin: "bottom center",
+                            whiteSpace: "nowrap",
+                            fontSize: "10px",
+                            paddingBottom: "20px",
+                            paddingLeft: "25px",
+                          }}
+                        >
+                          {new Date(date).toLocaleDateString()}
+                        </div>
+                      </th>
+                    ))}
 
-  {/* Daily AQI Row */}
-  <tr>
-    {/* Label */}
-    <td className="border p-2 font-bold bg-slate-200">
-      Daily AQI
-    </td>
+                    {/* GAP */}
+                    <th className="w-4"></th>
 
-    {/* Daily averages */}
-    {dates.map((date) => (
-      <td
-        key={date}
-        className={`border text-center w-24 font-semibold ${
-          dailyAvgMap[date] === 0
-            ? 'bg-gray-600'
-            : !getColorClass(dailyAvgMap[date]).startsWith('#')
-            ? getColorClass(dailyAvgMap[date])
-            : ''
-        }`}
-        style={
-          dailyAvgMap[date] !== 0 &&
-          getColorClass(dailyAvgMap[date]).startsWith('#')
-            ? { backgroundColor: getColorClass(dailyAvgMap[date]) }
-            : {}
-        }
-      >
-        {dailyAvgMap[date] || '-'}
-      </td>
-    ))}
+                    {/* Weekly Average Header — rotated 45deg */}
+                    <th className="border w-10 h-16 text-center align-bottom overflow-visible">
+                      <div
+                        style={{
+                          transform: "rotate(-45deg)",
+                          transformOrigin: "bottom center",
+                          whiteSpace: "nowrap",
+                          fontSize: "10px",
+                          paddingBottom: "20px",
+                          paddingLeft: "25px",
+                        }}
+                      >
+                        Weekly AQI
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
 
-    {/* GAP */}
-    <td className="w-6"></td>
+                <tbody>
+                  {/* Station Rows */}
+                  {stations.map((station) => (
+                    <tr key={station}>
+                      {/* Station Name */}
+                      <td className="border p-2 font-bold w-32 text-xs">
+                        {station}
+                      </td>
 
-    {/* Empty under Weekly Avg */}
-    <td className="border"></td>
-  </tr>
-</tbody>
-  </table>
+                      {/* Daily AQI Cells */}
+                      {dates.map((date) => {
+                        const key = `${station}-${date}`;
+                        return (
+                          <td
+                            key={key}
+                            className={`border text-center align-middle w-10 h-10 text-sm font-bold ${
+                              dataMap[key] === undefined
+                                ? 'bg-gray-600'
+                                : !getColorClass(dataMap[key]).startsWith('#')
+                                ? getColorClass(dataMap[key])
+                                : ''
+                            }`}
+                            style={
+                              dataMap[key] !== undefined &&
+                              getColorClass(dataMap[key]).startsWith('#')
+                                ? { backgroundColor: getColorClass(dataMap[key]) }
+                                : {}
+                            }
+                          >
+                            {dataMap[key] ?? '-'}
+                          </td>
+                        );
+                      })}
 
-  <button
-  onClick={downloadImage}
-  className="fixed bottom-16 right-2 p-3 bg-cyan-200 text-black rounded-full shadow-lg hover:bg-cyan-700 transition"
->
-  <FiDownload size={20} />
-</button>
+                      {/* GAP */}
+                      <td className="w-4"></td>
 
-  <div className="mt-5 border border-gray-300 bg-slate-100 rounded-md p-4 inline-flex flex-wrap gap-4 items-center">
-  {aqiScale.map((scale) => (
-    <div key={scale.label} className="flex items-center space-x-2">
-      <div className={`w-4 h-4 ${scale.color} border border-black`}></div>
-      <span className="text-sm">{scale.label}</span>
+                      {/* Weekly Average */}
+                      <td
+                        className={`border text-center align-middle w-10 h-10 text-sm font-bold ${
+                          weeklyAvgMap[station] === 0
+                            ? 'bg-gray-600'
+                            : !getColorClass(weeklyAvgMap[station]).startsWith('#')
+                            ? getColorClass(weeklyAvgMap[station])
+                            : ''
+                        }`}
+                        style={
+                          weeklyAvgMap[station] !== 0 &&
+                          getColorClass(weeklyAvgMap[station]).startsWith('#')
+                            ? { backgroundColor: getColorClass(weeklyAvgMap[station]) }
+                            : {}
+                        }
+                      >
+                        {weeklyAvgMap[station] || '-'}
+                      </td>
+                    </tr>
+                  ))}
+
+                  {/* GAP ROW */}
+                  <tr>
+                    <td colSpan={dates.length + 3} className="h-3"></td>
+                  </tr>
+
+                  {/* Daily AQI Row */}
+                  <tr>
+                    {/* Label */}
+                    <td className="border p-2 font-bold bg-slate-200 text-xs">
+                      Daily AQI
+                    </td>
+
+                    {/* Daily averages */}
+                    {dates.map((date) => (
+                      <td
+                        key={date}
+                        className={`border text-center align-middle w-10 h-10 text-sm font-bold ${
+                          dailyAvgMap[date] === 0
+                            ? 'bg-gray-600'
+                            : !getColorClass(dailyAvgMap[date]).startsWith('#')
+                            ? getColorClass(dailyAvgMap[date])
+                            : ''
+                        }`}
+                        style={
+                          dailyAvgMap[date] !== 0 &&
+                          getColorClass(dailyAvgMap[date]).startsWith('#')
+                            ? { backgroundColor: getColorClass(dailyAvgMap[date]) }
+                            : {}
+                        }
+                      >
+                        {dailyAvgMap[date] || '-'}
+                      </td>
+                    ))}
+
+                    {/* GAP */}
+                    <td className="w-4"></td>
+
+                    {/* Empty under Weekly Avg */}
+                    <td className="border w-10 h-10"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <button
+              onClick={downloadImage}
+              className="fixed bottom-16 right-2 p-3 bg-cyan-200 text-black rounded-full shadow-lg hover:bg-cyan-700 transition"
+            >
+              <FiDownload size={20} />
+            </button>
+
+            {/* ✅ Legend centered */}
+            <div className="flex justify-center mt-5">
+              <div className="border border-gray-300 bg-slate-100 rounded-md p-4 inline-flex flex-wrap gap-4 items-center">
+                {aqiScale.map((scale) => (
+                  <div key={scale.label} className="flex items-center space-x-2">
+                    <div className={`w-4 h-4 ${scale.color} border border-black`}></div>
+                    <span className="text-sm">{scale.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
-  ))}
-</div>
-
-
-  </div>
-</div>
-
-</div>
-
-
-</div>
   );
 }
