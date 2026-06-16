@@ -15,7 +15,6 @@ const HOURS  = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0"
 function interpolateColor(value: number, min: number, max: number): string {
   if (max === min) return "#3b82f6";
   const t = (value - min) / (max - min);
-  // dark blue → teal → yellow → red
   if (t < 0.33) {
     const s = t / 0.33;
     return `rgb(${Math.round(30 + s * 20)}, ${Math.round(100 + s * 90)}, ${Math.round(200 - s * 50)})`;
@@ -30,7 +29,6 @@ function interpolateColor(value: number, min: number, max: number): string {
 
 export default function HeatmapPanel({ readings, metric, metricLabel }: Props) {
   const { grid, min, max } = useMemo(() => {
-    // grid[day][hour] = { sum, count }
     const acc: Record<number, Record<number, { sum: number; count: number }>> = {};
     for (let d = 0; d < 7; d++) {
       acc[d] = {};
@@ -75,7 +73,7 @@ export default function HeatmapPanel({ readings, metric, metricLabel }: Props) {
       </div>
 
       {!hasData ? (
-        <div style={{ height: "200px", display: "flex", alignItems: "center", justifyContent: "center", color: "#334155", fontSize: "13px" }}>
+        <div style={{ height: "200px", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "13px" }}>
           No data available for heatmap
         </div>
       ) : (
@@ -85,7 +83,7 @@ export default function HeatmapPanel({ readings, metric, metricLabel }: Props) {
             {/* Hour labels */}
             <div />
             {HOURS.map((h) => (
-              <div key={h} style={{ fontSize: "9px", color: "#64748b", textAlign: "center", paddingBottom: "4px" }}>
+              <div key={h} style={{ fontSize: "9px", color: "#94a3b8", textAlign: "center", paddingBottom: "4px" }}>
                 {h.split(":")[0]}
               </div>
             ))}
@@ -93,12 +91,12 @@ export default function HeatmapPanel({ readings, metric, metricLabel }: Props) {
             {/* Rows */}
             {DAYS.map((day, d) => (
               <React.Fragment key={day}>
-                <div style={{ fontSize: "11px", color: "#94a3b8", display: "flex", alignItems: "center", paddingRight: "8px", fontWeight: "500" }}>
+                <div style={{ fontSize: "11px", color: "#64748b", display: "flex", alignItems: "center", paddingRight: "8px", fontWeight: "500" }}>
                   {day}
                 </div>
                 {HOURS.map((_, h) => {
                   const val = grid[d][h];
-                  const bg  = val !== null ? interpolateColor(val, min, max) : "#1e2433";
+                  const bg  = val !== null ? interpolateColor(val, min, max) : "#e2e8f0";
                   return (
                     <div
                       key={`${d}-${h}`}
@@ -107,7 +105,7 @@ export default function HeatmapPanel({ readings, metric, metricLabel }: Props) {
                         height: "28px",
                         borderRadius: "4px",
                         backgroundColor: bg,
-                        opacity: val !== null ? 0.9 : 0.3,
+                        opacity: val !== null ? 0.9 : 0.4,
                         cursor: "default",
                       }}
                     />
@@ -133,17 +131,18 @@ export default function HeatmapPanel({ readings, metric, metricLabel }: Props) {
 }
 
 const card: React.CSSProperties = {
-  backgroundColor: "#151923", borderRadius: "16px",
-  padding: "24px", border: "1px solid #1e2433",
+  backgroundColor: "#ffffff", borderRadius: "16px",
+  padding: "24px", border: "1px solid #e2e8f0",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
 };
 const cardHeader: React.CSSProperties = {
   display: "flex", justifyContent: "space-between",
   alignItems: "center", marginBottom: "20px",
 };
 const cardTitle: React.CSSProperties = {
-  fontSize: "14px", fontWeight: "600", color: "#e2e8f0", margin: 0,
+  fontSize: "14px", fontWeight: "600", color: "#0f172a", margin: 0,
 };
 const badge: React.CSSProperties = {
   fontSize: "12px", color: "#64748b",
-  backgroundColor: "#1e2433", padding: "4px 10px", borderRadius: "999px",
+  backgroundColor: "#f1f5f9", padding: "4px 10px", borderRadius: "999px",
 };
