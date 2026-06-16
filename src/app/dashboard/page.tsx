@@ -73,18 +73,15 @@ export default function DashboardPage() {
   const [error, setError]                     = useState<string | null>(null);
   const [stationsLoading, setStationsLoading] = useState(true);
 
-  // Load stations on mount
   useEffect(() => {
     fetchAllStations()
       .then((data) => {
         setStations(data);
-        // Default: select all stations
         setSelectedIds(data.map((s) => s.id));
       })
       .catch((e) => setError(e.message))
       .finally(() => setStationsLoading(false));
 
-    // Default date range: last 7 days
     const presets = presetRanges();
     setFromDate(presets[0].from);
     setToDate(presets[0].to);
@@ -105,12 +102,10 @@ export default function DashboardPage() {
     }
   }, [stations, selectedIds, period, fromDate, toDate]);
 
-  // Auto-fetch when filters change (including station selection)
   useEffect(() => {
     if (stations.length > 0 && fromDate && toDate) fetchData();
   }, [period, fromDate, toDate, selectedIds]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Summary stats
   const validAQI = readings.map((r) => r.aqi_overall).filter((v): v is number => v !== null);
   const avgAQI   = validAQI.length > 0 ? Math.round(validAQI.reduce((a, b) => a + b, 0) / validAQI.length) : null;
   const maxAQI   = validAQI.length > 0 ? Math.max(...validAQI) : null;
@@ -133,13 +128,13 @@ export default function DashboardPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#0f1117", color: "#e2e8f0", fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div style={{ minHeight: "100vh", backgroundColor: "#f1f5f9", color: "#1e293b", fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* ── Top bar ── */}
-      <header style={{ borderBottom: "1px solid #1e2433", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, backgroundColor: "#0f1117", zIndex: 50 }}>
+      <header style={{ borderBottom: "1px solid #e2e8f0", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, backgroundColor: "#ffffff", zIndex: 50, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
-          <span style={{ fontWeight: "700", fontSize: "15px", letterSpacing: "0.02em" }}>Sri Lanka Air Quality</span>
+          <span style={{ fontWeight: "700", fontSize: "15px", letterSpacing: "0.02em", color: "#0f172a" }}>Sri Lanka Air Quality</span>
         </div>
         <div style={{ display: "flex", gap: "8px" }}>
           {(["10min", "1hour", "1day"] as Period[]).map((p) => (
@@ -148,8 +143,8 @@ export default function DashboardPage() {
               onClick={() => setPeriod(p)}
               style={{
                 padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: "600", border: "none", cursor: "pointer",
-                backgroundColor: period === p ? "#3b82f6" : "#1e2433",
-                color: period === p ? "#fff" : "#94a3b8",
+                backgroundColor: period === p ? "#3b82f6" : "#f1f5f9",
+                color: period === p ? "#fff" : "#64748b",
                 transition: "all 0.15s",
               }}
             >{PERIOD_LABELS[p]}</button>
@@ -160,7 +155,7 @@ export default function DashboardPage() {
       <main style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", display: "flex", flexDirection: "column", gap: "28px" }}>
 
         {/* ── Controls ── */}
-        <section style={{ backgroundColor: "#151923", borderRadius: "16px", padding: "24px", border: "1px solid #1e2433" }}>
+        <section style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "24px", border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-end" }}>
 
             {/* Date presets */}
@@ -173,9 +168,9 @@ export default function DashboardPage() {
                     onClick={() => applyPreset(p.from, p.to)}
                     style={{
                       ...outlineBtn,
-                      backgroundColor: fromDate === p.from && toDate === p.to ? "#1e3a5f" : "transparent",
-                      borderColor: fromDate === p.from && toDate === p.to ? "#3b82f6" : "#2d3748",
-                      color: fromDate === p.from && toDate === p.to ? "#93c5fd" : "#94a3b8",
+                      backgroundColor: fromDate === p.from && toDate === p.to ? "#eff6ff" : "transparent",
+                      borderColor: fromDate === p.from && toDate === p.to ? "#3b82f6" : "#e2e8f0",
+                      color: fromDate === p.from && toDate === p.to ? "#2563eb" : "#64748b",
                     }}
                   >{p.label}</button>
                 ))}
@@ -223,15 +218,15 @@ export default function DashboardPage() {
               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
                 <button
                   onClick={() => setSelectedIds(stations.map((s) => s.id))}
-                  style={{ ...chipBtn, backgroundColor: "#1e2433", color: "#94a3b8" }}
+                  style={{ ...chipBtn, backgroundColor: "#f1f5f9", color: "#64748b" }}
                 >All</button>
                 <button
                   onClick={() => setSelectedIds(stations.filter((s) => s.source === "purpleair").map((s) => s.id))}
-                  style={{ ...chipBtn, backgroundColor: "#1e2433", color: "#94a3b8" }}
+                  style={{ ...chipBtn, backgroundColor: "#f1f5f9", color: "#64748b" }}
                 >PurpleAir only</button>
                 <button
                   onClick={() => setSelectedIds(stations.filter((s) => s.source === "iqair").map((s) => s.id))}
-                  style={{ ...chipBtn, backgroundColor: "#1e2433", color: "#94a3b8" }}
+                  style={{ ...chipBtn, backgroundColor: "#f1f5f9", color: "#64748b" }}
                 >IQAir only</button>
                 {stations.map((s) => {
                   const active = selectedIds.includes(s.id);
@@ -242,9 +237,9 @@ export default function DashboardPage() {
                       onClick={() => toggleStation(s.id)}
                       style={{
                         ...chipBtn,
-                        backgroundColor: active ? accent + "22" : "#1e2433",
-                        borderColor: active ? accent : "#2d3748",
-                        color: active ? accent : "#64748b",
+                        backgroundColor: active ? accent + "18" : "#f8fafc",
+                        borderColor: active ? accent : "#e2e8f0",
+                        color: active ? accent : "#94a3b8",
                       }}
                     >
                       <span style={{ fontSize: "9px", opacity: 0.7, marginRight: "4px" }}>{s.source === "purpleair" ? "PA" : "IQ"}</span>
@@ -258,7 +253,7 @@ export default function DashboardPage() {
         </section>
 
         {error && (
-          <div style={{ backgroundColor: "#2d1515", border: "1px solid #7f1d1d", borderRadius: "12px", padding: "16px", color: "#fca5a5", fontSize: "14px" }}>
+          <div style={{ backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", padding: "16px", color: "#dc2626", fontSize: "14px" }}>
             ⚠ {error}
           </div>
         )}
@@ -273,10 +268,10 @@ export default function DashboardPage() {
               { label: "Total readings", value: readings.length },
             ].map(({ label, value }) => {
               const color = typeof value === "number" && label !== "Total readings"
-                ? getAQIColor(value) : "#94a3b8";
+                ? getAQIColor(value) : "#64748b";
               return (
-                <div key={label} style={{ backgroundColor: "#151923", borderRadius: "16px", padding: "24px", border: "1px solid #1e2433", textAlign: "center" }}>
-                  <p style={{ fontSize: "11px", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: "600", margin: "0 0 10px 0" }}>{label}</p>
+                <div key={label} style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "24px", border: "1px solid #e2e8f0", textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                  <p style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: "600", margin: "0 0 10px 0" }}>{label}</p>
                   <p style={{ fontSize: "36px", fontWeight: "800", color, margin: 0, lineHeight: 1 }}>
                     {value ?? "—"}
                   </p>
@@ -292,7 +287,6 @@ export default function DashboardPage() {
         {/* ── Charts ── */}
         {readings.length > 0 ? (
           <>
-            {/* Line chart */}
             <LineChartPanel
               readings={readings}
               metric={metric}
@@ -300,37 +294,35 @@ export default function DashboardPage() {
               period={period}
             />
 
-            {/* Pie + Bar side by side */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
               <PieChartPanel readings={readings} />
               <BarChartPanel readings={readings} metric={metric} metricLabel={METRIC_LABELS[metric]} />
             </div>
 
-            {/* Heatmap — only for sub-daily periods */}
             {period !== "1day" && (
               <HeatmapPanel readings={readings} metric={metric} metricLabel={METRIC_LABELS[metric]} />
             )}
           </>
         ) : !loading && (
-          <div style={{ height: "220px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", border: "2px dashed #1e2433", borderRadius: "16px", color: "#334155", gap: "8px" }}>
+          <div style={{ height: "220px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", border: "2px dashed #e2e8f0", borderRadius: "16px", color: "#cbd5e1", gap: "8px" }}>
             <span style={{ fontSize: "32px" }}>🌬</span>
             <span style={{ fontSize: "14px" }}>Select stations and a date range, then click Apply</span>
           </div>
         )}
 
         {/* ── AQI legend ── */}
-        <div style={{ backgroundColor: "#151923", borderRadius: "16px", padding: "20px", border: "1px solid #1e2433" }}>
-          <p style={{ fontSize: "11px", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: "600", margin: "0 0 12px 0" }}>US EPA AQI Scale</p>
+        <div style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "20px", border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+          <p style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: "600", margin: "0 0 12px 0" }}>US EPA AQI Scale</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
             {[
-              { range: "0–50",    label: "Good",                   color: "#22c55e" },
-              { range: "51–100",  label: "Moderate",               color: "#eab308" },
-              { range: "101–150", label: "Unhealthy (Sensitive)",  color: "#f97316" },
-              { range: "151–200", label: "Unhealthy",              color: "#ef4444" },
-              { range: "201–300", label: "Very Unhealthy",         color: "#a855f7" },
+              { range: "0–50",    label: "Good",                   color: "#16a34a" },
+              { range: "51–100",  label: "Moderate",               color: "#ca8a04" },
+              { range: "101–150", label: "Unhealthy (Sensitive)",  color: "#ea580c" },
+              { range: "151–200", label: "Unhealthy",              color: "#dc2626" },
+              { range: "201–300", label: "Very Unhealthy",         color: "#9333ea" },
               { range: "301+",    label: "Hazardous",              color: "#7f1d1d" },
             ].map(({ range, label, color }) => (
-              <div key={range} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: "600", padding: "6px 12px", borderRadius: "999px", backgroundColor: color + "22", color }}>
+              <div key={range} style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", fontWeight: "600", padding: "6px 12px", borderRadius: "999px", backgroundColor: color + "18", color }}>
                 <span>{range}</span>
                 <span style={{ fontWeight: "400", opacity: 0.8 }}>{label}</span>
               </div>
@@ -352,9 +344,9 @@ const labelStyle: React.CSSProperties = {
 };
 
 const inputStyle: React.CSSProperties = {
-  backgroundColor: "#1e2433", border: "1px solid #2d3748",
+  backgroundColor: "#f8fafc", border: "1px solid #e2e8f0",
   borderRadius: "10px", padding: "9px 14px",
-  fontSize: "13px", color: "#e2e8f0",
+  fontSize: "13px", color: "#1e293b",
   outline: "none",
 };
 
@@ -366,8 +358,8 @@ const primaryBtn: React.CSSProperties = {
 };
 
 const outlineBtn: React.CSSProperties = {
-  backgroundColor: "transparent", color: "#94a3b8",
-  border: "1px solid #2d3748", borderRadius: "10px",
+  backgroundColor: "transparent", color: "#64748b",
+  border: "1px solid #e2e8f0", borderRadius: "10px",
   padding: "9px 16px", fontSize: "12px",
   fontWeight: "500", cursor: "pointer",
 };
@@ -375,6 +367,6 @@ const outlineBtn: React.CSSProperties = {
 const chipBtn: React.CSSProperties = {
   padding: "5px 12px", borderRadius: "8px",
   fontSize: "12px", fontWeight: "500",
-  border: "1px solid #2d3748", cursor: "pointer",
+  border: "1px solid #e2e8f0", cursor: "pointer",
   transition: "all 0.15s",
 };

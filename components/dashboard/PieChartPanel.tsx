@@ -53,20 +53,20 @@ export default function PieChartPanel({ readings }: Props) {
               {data.map((entry, i) => (
                 <Cell
                   key={entry.name}
-                  fill={CATEGORY_COLORS[entry.name] ?? "#64748b"}
+                  fill={CATEGORY_COLORS[entry.name] ?? "#94a3b8"}
                 />
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ backgroundColor: "#151923", border: "1px solid #2d3748", borderRadius: "10px", fontSize: "12px" }}
+              contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "12px", color: "#1e293b" }}
               formatter={(value) => {
-              const num = typeof value === "number" ? value : Number(value);
-              return [`${num} (${((num / total) * 100).toFixed(1)}%)`, "Readings"] as [string, string];
-            }}
+                const num = typeof value === "number" ? value : Number(value);
+                return [`${num} (${((num / total) * 100).toFixed(1)}%)`, "Readings"] as [string, string];
+              }}
             />
             <Legend
-              wrapperStyle={{ fontSize: "12px", color: "#94a3b8" }}
-              formatter={(value) => <span style={{ color: CATEGORY_COLORS[value] ?? "#94a3b8" }}>{value}</span>}
+              wrapperStyle={{ fontSize: "12px", color: "#64748b" }}
+              formatter={(value) => <span style={{ color: CATEGORY_COLORS[value] ?? "#64748b" }}>{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -77,24 +77,25 @@ export default function PieChartPanel({ readings }: Props) {
 
 function EmptyState() {
   return (
-    <div style={{ height: "280px", display: "flex", alignItems: "center", justifyContent: "center", color: "#334155", fontSize: "13px" }}>
+    <div style={{ height: "280px", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "13px" }}>
       No category data available
     </div>
   );
 }
 
 const card: React.CSSProperties = {
-  backgroundColor: "#151923", borderRadius: "16px",
-  padding: "24px", border: "1px solid #1e2433",
+  backgroundColor: "#ffffff", borderRadius: "16px",
+  padding: "24px", border: "1px solid #e2e8f0",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
 };
 const cardHeader: React.CSSProperties = {
   display: "flex", justifyContent: "space-between",
   alignItems: "center", marginBottom: "20px",
 };
 const cardTitle: React.CSSProperties = {
-  fontSize: "14px", fontWeight: "600", color: "#e2e8f0", margin: 0,
+  fontSize: "14px", fontWeight: "600", color: "#0f172a", margin: 0,
 };
 const badge: React.CSSProperties = {
   fontSize: "12px", color: "#64748b",
-  backgroundColor: "#1e2433", padding: "4px 10px", borderRadius: "999px",
+  backgroundColor: "#f1f5f9", padding: "4px 10px", borderRadius: "999px",
 };

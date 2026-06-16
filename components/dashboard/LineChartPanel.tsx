@@ -14,7 +14,6 @@ type Props = {
   period: Period;
 };
 
-// Distinct colours for up to 21 stations
 const PALETTE = [
   "#3b82f6","#a855f7","#22c55e","#f97316","#ef4444",
   "#eab308","#06b6d4","#ec4899","#14b8a6","#f59e0b",
@@ -34,7 +33,6 @@ function formatTimestamp(ts: string, period: Period): string {
 export default function LineChartPanel({ readings, metric, metricLabel, period }: Props) {
   const { chartData, stationNames } = useMemo(() => {
     const names = Array.from(new Set(readings.map((r) => r.station_name)));
-    // Group by timestamp, pivot stations as columns
     const byTs: Record<string, Record<string, number | null>> = {};
     for (const r of readings) {
       const ts = r.timestamp;
@@ -59,32 +57,32 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
       <ResponsiveContainer width="100%" height={320}>
         <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
           {showAQIBands && <>
-            <ReferenceArea y1={0}   y2={50}  fill="#22c55e" fillOpacity={0.06} />
-            <ReferenceArea y1={50}  y2={100} fill="#eab308" fillOpacity={0.06} />
-            <ReferenceArea y1={100} y2={150} fill="#f97316" fillOpacity={0.06} />
-            <ReferenceArea y1={150} y2={200} fill="#ef4444" fillOpacity={0.06} />
-            <ReferenceArea y1={200} y2={300} fill="#a855f7" fillOpacity={0.06} />
+            <ReferenceArea y1={0}   y2={50}  fill="#22c55e" fillOpacity={0.08} />
+            <ReferenceArea y1={50}  y2={100} fill="#eab308" fillOpacity={0.08} />
+            <ReferenceArea y1={100} y2={150} fill="#f97316" fillOpacity={0.08} />
+            <ReferenceArea y1={150} y2={200} fill="#ef4444" fillOpacity={0.08} />
+            <ReferenceArea y1={200} y2={300} fill="#a855f7" fillOpacity={0.08} />
           </>}
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e2433" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis
             dataKey="__ts"
             tickFormatter={(v) => formatTimestamp(v, period)}
             tick={{ fill: "#64748b", fontSize: 11 }}
-            axisLine={{ stroke: "#1e2433" }}
+            axisLine={{ stroke: "#e2e8f0" }}
             tickLine={false}
           />
           <YAxis
             tick={{ fill: "#64748b", fontSize: 11 }}
-            axisLine={{ stroke: "#1e2433" }}
+            axisLine={{ stroke: "#e2e8f0" }}
             tickLine={false}
           />
           <Tooltip
-            contentStyle={{ backgroundColor: "#151923", border: "1px solid #2d3748", borderRadius: "10px", fontSize: "12px" }}
-            labelStyle={{ color: "#94a3b8" }}
-            itemStyle={{ color: "#e2e8f0" }}
+            contentStyle={{ backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "12px" }}
+            labelStyle={{ color: "#64748b" }}
+            itemStyle={{ color: "#1e293b" }}
             labelFormatter={(v) => formatTimestamp(v, period)}
           />
-          <Legend wrapperStyle={{ fontSize: "12px", color: "#94a3b8", paddingTop: "12px" }} />
+          <Legend wrapperStyle={{ fontSize: "12px", color: "#64748b", paddingTop: "12px" }} />
           {stationNames.map((name, i) => (
             <Line
               key={name}
@@ -103,8 +101,9 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
 }
 
 const card: React.CSSProperties = {
-  backgroundColor: "#151923", borderRadius: "16px",
-  padding: "24px", border: "1px solid #1e2433",
+  backgroundColor: "#ffffff", borderRadius: "16px",
+  padding: "24px", border: "1px solid #e2e8f0",
+  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
 };
 const cardHeader: React.CSSProperties = {
   display: "flex", justifyContent: "space-between",
@@ -112,9 +111,9 @@ const cardHeader: React.CSSProperties = {
 };
 const cardTitle: React.CSSProperties = {
   fontSize: "14px", fontWeight: "600",
-  color: "#e2e8f0", margin: 0,
+  color: "#0f172a", margin: 0,
 };
 const badge: React.CSSProperties = {
   fontSize: "12px", color: "#64748b",
-  backgroundColor: "#1e2433", padding: "4px 10px", borderRadius: "999px",
+  backgroundColor: "#f1f5f9", padding: "4px 10px", borderRadius: "999px",
 };
