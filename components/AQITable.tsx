@@ -138,65 +138,37 @@ export default function AQITable({ readings }: AQITableProps) {
       : '';
 
   return (
-    <div className="p-4 flex flex-col items-center">
+    <div className="p-4 flex justify-center">
       <div className="w-full">
-
-        {/* ✅ containerRef: flex + items-center to center the scaled table */}
-        <div ref={containerRef} className="w-full flex flex-col items-center overflow-hidden">
+        <div ref={containerRef} className="w-full flex justify-center overflow-hidden">
           <div
             ref={tableRef}
             style={{
               transform: `scale(${scale})`,
               transformOrigin: "top center",
               width: "fit-content",
-              margin: "0 auto",
             }}
           >
-            <h3 className="text-xl font-bold mb-4 text-cyan-600 text-center">
+            <h3 className="text-xl font-bold mb-4 text-cyan-600 flex justify-center">
               Weekly Air Quality Card
             </h3>
 
-            {/* ✅ Date range centered */}
-            <div className="flex ml-36 mb-4">
-              <div className="inline-block bg-slate-100 border-cyan-600 border-2 text-cyan-700 px-4 py-2 rounded-md text-sm font-medium">
-                {dateRange}
-              </div>
+            <div className="mb-4 inline-block bg-slate-100 border-cyan-600 border-2 text-cyan-700 px-4 py-2 rounded-md text-sm font-medium">
+              {dateRange}
             </div>
 
-            {/* ✅ Table centered */}
-            <div className="flex justify-center">
-              <table className="table-fixed border border-collapse text-[10px] bg-slate-100 min-w-max">
-                <thead>
-                  <tr>
-                    {/* Station column */}
-                    <th className="border p-2 w-32 text-left align-bottom">Station / Date</th>
+            <table className="table-fixed border border-collapse text-[10px] bg-slate-100 min-w-max">
+              <thead>
+                <tr>
+                  {/* Station column */}
+                  <th className="border p-2 w-32 text-left align-bottom">Station / Date</th>
 
-                    {/* Date header cells — rotated 45deg */}
-                    {dates.map((date) => (
-                      <th
-                        key={date}
-                        className="border w-10 h-16 text-center align-bottom overflow-visible"
-                      >
-                        <div
-                          style={{
-                            transform: "rotate(-45deg)",
-                            transformOrigin: "bottom center",
-                            whiteSpace: "nowrap",
-                            fontSize: "10px",
-                            paddingBottom: "20px",
-                            paddingLeft: "25px",
-                          }}
-                        >
-                          {new Date(date).toLocaleDateString()}
-                        </div>
-                      </th>
-                    ))}
-
-                    {/* GAP */}
-                    <th className="w-4"></th>
-
-                    {/* Weekly Average Header — rotated 45deg */}
-                    <th className="border w-10 h-16 text-center align-bottom overflow-visible">
+                  {/* Date header cells — rotated 45deg, smaller */}
+                  {dates.map((date) => (
+                    <th
+                      key={date}
+                      className="border w-10 h-16 text-center align-bottom overflow-visible"
+                    >
                       <div
                         style={{
                           transform: "rotate(-45deg)",
@@ -207,113 +179,132 @@ export default function AQITable({ readings }: AQITableProps) {
                           paddingLeft: "25px",
                         }}
                       >
-                        Weekly AQI
+                        {new Date(date).toLocaleDateString()}
                       </div>
                     </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {/* Station Rows */}
-                  {stations.map((station) => (
-                    <tr key={station}>
-                      {/* Station Name */}
-                      <td className="border p-2 font-bold w-32 text-xs">
-                        {station}
-                      </td>
-
-                      {/* Daily AQI Cells */}
-                      {dates.map((date) => {
-                        const key = `${station}-${date}`;
-                        return (
-                          <td
-                            key={key}
-                            className={`border text-center align-middle w-10 h-10 text-sm font-bold ${
-                              dataMap[key] === undefined
-                                ? 'bg-gray-600'
-                                : !getColorClass(dataMap[key]).startsWith('#')
-                                ? getColorClass(dataMap[key])
-                                : ''
-                            }`}
-                            style={
-                              dataMap[key] !== undefined &&
-                              getColorClass(dataMap[key]).startsWith('#')
-                                ? { backgroundColor: getColorClass(dataMap[key]) }
-                                : {}
-                            }
-                          >
-                            {dataMap[key] ?? '-'}
-                          </td>
-                        );
-                      })}
-
-                      {/* GAP */}
-                      <td className="w-4"></td>
-
-                      {/* Weekly Average */}
-                      <td
-                        className={`border text-center align-middle w-10 h-10 text-sm font-bold ${
-                          weeklyAvgMap[station] === 0
-                            ? 'bg-gray-600'
-                            : !getColorClass(weeklyAvgMap[station]).startsWith('#')
-                            ? getColorClass(weeklyAvgMap[station])
-                            : ''
-                        }`}
-                        style={
-                          weeklyAvgMap[station] !== 0 &&
-                          getColorClass(weeklyAvgMap[station]).startsWith('#')
-                            ? { backgroundColor: getColorClass(weeklyAvgMap[station]) }
-                            : {}
-                        }
-                      >
-                        {weeklyAvgMap[station] || '-'}
-                      </td>
-                    </tr>
                   ))}
 
-                  {/* GAP ROW */}
-                  <tr>
-                    <td colSpan={dates.length + 3} className="h-3"></td>
-                  </tr>
+                  {/* GAP */}
+                  <th className="w-4"></th>
 
-                  {/* Daily AQI Row */}
-                  <tr>
-                    {/* Label */}
-                    <td className="border p-2 font-bold bg-slate-200 text-xs">
-                      Daily AQI
+                  {/* Weekly Average Header — rotated 45deg */}
+                  <th className="border w-10 h-16 text-center align-bottom overflow-visible">
+                    <div
+                      style={{
+                        transform: "rotate(-45deg)",
+                        transformOrigin: "bottom center",
+                        whiteSpace: "nowrap",
+                        fontSize: "10px",
+                        paddingBottom: "20px",
+                        paddingLeft: "25px",
+                      }}
+                    >
+                      Weekly AQI
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {/* Station Rows */}
+                {stations.map((station) => (
+                  <tr key={station}>
+                    {/* Station Name */}
+                    <td className="border p-2 font-bold w-32 text-xs">
+                      {station}
                     </td>
 
-                    {/* Daily averages */}
-                    {dates.map((date) => (
-                      <td
-                        key={date}
-                        className={`border text-center align-middle w-10 h-10 text-sm font-bold ${
-                          dailyAvgMap[date] === 0
-                            ? 'bg-gray-600'
-                            : !getColorClass(dailyAvgMap[date]).startsWith('#')
-                            ? getColorClass(dailyAvgMap[date])
-                            : ''
-                        }`}
-                        style={
-                          dailyAvgMap[date] !== 0 &&
-                          getColorClass(dailyAvgMap[date]).startsWith('#')
-                            ? { backgroundColor: getColorClass(dailyAvgMap[date]) }
-                            : {}
-                        }
-                      >
-                        {dailyAvgMap[date] || '-'}
-                      </td>
-                    ))}
+                    {/* Daily AQI Cells — small squares, bigger text */}
+                    {dates.map((date) => {
+                      const key = `${station}-${date}`;
+                      return (
+                        <td
+                          key={key}
+                          className={`border text-center align-middle w-10 h-10 text-sm font-bold ${
+                            dataMap[key] === undefined
+                              ? 'bg-gray-600'
+                              : !getColorClass(dataMap[key]).startsWith('#')
+                              ? getColorClass(dataMap[key])
+                              : ''
+                          }`}
+                          style={
+                            dataMap[key] !== undefined &&
+                            getColorClass(dataMap[key]).startsWith('#')
+                              ? { backgroundColor: getColorClass(dataMap[key]) }
+                              : {}
+                          }
+                        >
+                          {dataMap[key] ?? '-'}
+                        </td>
+                      );
+                    })}
 
                     {/* GAP */}
                     <td className="w-4"></td>
 
-                    {/* Empty under Weekly Avg */}
-                    <td className="border w-10 h-10"></td>
+                    {/* Weekly Average — small square, bigger text */}
+                    <td
+                      className={`border text-center align-middle w-10 h-10 text-sm font-bold ${
+                        weeklyAvgMap[station] === 0
+                          ? 'bg-gray-600'
+                          : !getColorClass(weeklyAvgMap[station]).startsWith('#')
+                          ? getColorClass(weeklyAvgMap[station])
+                          : ''
+                      }`}
+                      style={
+                        weeklyAvgMap[station] !== 0 &&
+                        getColorClass(weeklyAvgMap[station]).startsWith('#')
+                          ? { backgroundColor: getColorClass(weeklyAvgMap[station]) }
+                          : {}
+                      }
+                    >
+                      {weeklyAvgMap[station] || '-'}
+                    </td>
                   </tr>
-                </tbody>
-              </table>
-            </div>
+                ))}
+
+                {/* GAP ROW */}
+                <tr>
+                  <td colSpan={dates.length + 3} className="h-3"></td>
+                </tr>
+
+                {/* Daily AQI Row */}
+                <tr>
+                  {/* Label */}
+                  <td className="border p-2 font-bold bg-slate-200 text-xs">
+                    Daily AQI
+                  </td>
+
+                  {/* Daily averages — small squares, bigger text */}
+                  {dates.map((date) => (
+                    <td
+                      key={date}
+                      className={`border text-center align-middle w-10 h-10 text-sm font-bold ${
+                        dailyAvgMap[date] === 0
+                          ? 'bg-gray-600'
+                          : !getColorClass(dailyAvgMap[date]).startsWith('#')
+                          ? getColorClass(dailyAvgMap[date])
+                          : ''
+                      }`}
+                      style={
+                        dailyAvgMap[date] !== 0 &&
+                        getColorClass(dailyAvgMap[date]).startsWith('#')
+                          ? { backgroundColor: getColorClass(dailyAvgMap[date]) }
+                          : {}
+                      }
+                    >
+                      {dailyAvgMap[date] || '-'}
+                    </td>
+                  ))}
+
+                  {/* GAP */}
+                  <td className="w-4"></td>
+
+                  {/* Empty under Weekly Avg */}
+                  <td className="border w-10 h-10"></td>
+                </tr>
+              </tbody>
+            </table>
 
             <button
               onClick={downloadImage}
@@ -322,18 +313,14 @@ export default function AQITable({ readings }: AQITableProps) {
               <FiDownload size={20} />
             </button>
 
-            {/* ✅ Legend centered */}
-            <div className="flex justify-center mt-5">
-              <div className="border border-gray-300 bg-slate-100 rounded-md p-4 inline-flex flex-wrap gap-4 items-center">
-                {aqiScale.map((scale) => (
-                  <div key={scale.label} className="flex items-center space-x-2">
-                    <div className={`w-4 h-4 ${scale.color} border border-black`}></div>
-                    <span className="text-sm">{scale.label}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="mt-5 border border-gray-300 bg-slate-100 rounded-md p-4 inline-flex flex-wrap gap-4 items-center">
+              {aqiScale.map((scale) => (
+                <div key={scale.label} className="flex items-center space-x-2">
+                  <div className={`w-4 h-4 ${scale.color} border border-black`}></div>
+                  <span className="text-sm">{scale.label}</span>
+                </div>
+              ))}
             </div>
-
           </div>
         </div>
       </div>
