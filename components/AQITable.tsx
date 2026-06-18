@@ -149,11 +149,16 @@ export default function AQITable({ readings }: AQITableProps) {
               width: "fit-content",
             }}
           >
-            <h3 className="text-xl font-bold mb-4 text-cyan-600 flex justify-center">
-              Weekly Air Quality Card
-            </h3>
+           
 
-            <div className="mb-4 inline-block bg-slate-100 border-cyan-600 border-2 text-cyan-700 px-4 py-2 rounded-md text-sm font-medium">
+        <header style={{ borderBottom: "1px solid #e2e8f0", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, backgroundColor: "#ffffff", zIndex: 50, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#22c55e", boxShadow: "0 0 8px #22c55e", marginLeft: "-20px"}} />
+          <span style={{ fontWeight: "700", fontSize: "15px", letterSpacing: "0.02em", color: "#0f172a" }}>Weekly Air Quality Card</span>
+        </div>
+      </header>
+
+            <div className="mb-4 mt-4 inline-block bg-slate-100 border-cyan-600 border-2 text-cyan-700 px-4 py-2 rounded-md text-sm font-medium">
               {dateRange}
             </div>
 
