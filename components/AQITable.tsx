@@ -151,7 +151,7 @@ export default function AQITable({ readings }: AQITableProps) {
           >
            
 
-        <header style={{marginLeft:-50, marginRight:-50, borderBottom: "1px solid #e2e8f0", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, backgroundColor: "#ffffff", zIndex: 50, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+        <header style={{ borderBottom: "1px solid #e2e8f0", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, backgroundColor: "#ffffff", zIndex: 50, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#22c55e", boxShadow: "0 0 8px #22c55e", marginLeft: "-20px"}} />
           <span style={{ fontWeight: "700", fontSize: "20px", letterSpacing: "0.02em", color: "#0f172a" }}>Weekly Air Quality Card</span>
