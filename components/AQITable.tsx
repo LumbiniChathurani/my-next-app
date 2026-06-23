@@ -108,7 +108,7 @@ export default function AQITable({ readings }: AQITableProps) {
   });
 
   const getColorClass = (aqi: number) => {
-    if (aqi <= 50) return 'bg-green-600';
+    if (aqi <= 50) return '#22c55e';
     if (aqi <= 100) return '#FFEA00';
     if (aqi <= 150) return '#FFA500';
     if (aqi <= 200) return 'bg-red-600';
@@ -117,7 +117,7 @@ export default function AQITable({ readings }: AQITableProps) {
   };
 
   const aqiScale = [
-    { label: 'Good (0-50)', color: 'bg-green-600' },
+    { label: 'Good (0-50)', color: '#22c55e' },
     { label: 'Moderate (51-100)', color: 'bg-yellow-400' },
     { label: 'Unhealthy for Sensitive (101-150)', color: 'bg-orange-500' },
     { label: 'Unhealthy (151-200)', color: 'bg-red-600' },
