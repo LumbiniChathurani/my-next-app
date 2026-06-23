@@ -138,7 +138,7 @@ export default function AQITable({ readings }: AQITableProps) {
       : '';
 
   return (
-    <div className="p-4 flex justify-center">
+    <div className="p-4 flex justify-center bg-slate-100">
       <div className="w-full">
         <div ref={containerRef} className="w-full flex justify-center overflow-hidden">
           <div
@@ -158,11 +158,11 @@ export default function AQITable({ readings }: AQITableProps) {
         </div>
       </header>
 
-            <div className="mb-4 mt-4 inline-block bg-slate-100 border-cyan-600 border-2 text-cyan-700 px-4 py-2 rounded-md text-sm font-medium">
+            <div className="mb-4 mt-4 inline-block bg-white border-cyan-600 border-2 text-cyan-700 px-4 py-2 rounded-md text-sm font-medium">
               {dateRange}
             </div>
 
-            <table className="table-fixed border border-collapse text-[10px] bg-slate-100 min-w-max">
+            <table className="table-fixed border border-collapse text-[10px] bg-white min-w-max">
               <thead>
                 <tr>
                   {/* Station column */}
@@ -318,7 +318,7 @@ export default function AQITable({ readings }: AQITableProps) {
               <FiDownload size={20} />
             </button>
 
-            <div className="mt-5 border border-gray-300 bg-slate-100 rounded-md p-4 inline-flex flex-wrap gap-4 items-center">
+            <div className="mt-5 border border-gray-300 bg-white rounded-md p-4 inline-flex flex-wrap gap-4 items-center">
               {aqiScale.map((scale) => (
                 <div key={scale.label} className="flex items-center space-x-2">
                   <div className={`w-4 h-4 ${scale.color} border border-black`}></div>
