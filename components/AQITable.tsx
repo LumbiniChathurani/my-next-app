@@ -117,7 +117,7 @@ export default function AQITable({ readings }: AQITableProps) {
   };
 
   const aqiScale = [
-    { label: 'Good (0-50)', color: '#22c55e' },
+    { label: 'Good (0-50)', color: 'bg-green-600' },
     { label: 'Moderate (51-100)', color: 'bg-yellow-400' },
     { label: 'Unhealthy for Sensitive (101-150)', color: 'bg-orange-500' },
     { label: 'Unhealthy (151-200)', color: 'bg-red-600' },
