@@ -228,6 +228,10 @@ export default function DashboardPage() {
                   onClick={() => setSelectedIds(stations.filter((s) => s.source === "iqair").map((s) => s.id))}
                   style={{ ...chipBtn, backgroundColor: "#f1f5f9", color: "#64748b" }}
                 >IQAir only</button>
+                <button
+  onClick={() => setSelectedIds([])}
+  style={{ ...chipBtn, backgroundColor: "#f1f5f9", color: "#64748b" }}
+>None</button>
                 {stations.map((s) => {
                   const active = selectedIds.includes(s.id);
                   const accent = s.source === "purpleair" ? "#a855f7" : "#3b82f6";
