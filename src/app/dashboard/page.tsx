@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   fetchAllStations,
   fetchCombinedReadings,
@@ -15,6 +15,8 @@ import LineChartPanel from "../../../components/dashboard/LineChartPanel";
 import PieChartPanel from "../../../components/dashboard/PieChartPanel";
 import BarChartPanel from "../../../components/dashboard/BarChartPanel";
 import HeatmapPanel from "../../../components/dashboard/HeatmapPanel";
+
+
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -72,6 +74,8 @@ export default function DashboardPage() {
   const [loading, setLoading]                 = useState(false);
   const [error, setError]                     = useState<string | null>(null);
   const [stationsLoading, setStationsLoading] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchAllStations()
@@ -85,6 +89,16 @@ export default function DashboardPage() {
     const presets = presetRanges();
     setFromDate(presets[0].from);
     setToDate(presets[0].to);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -125,6 +139,17 @@ export default function DashboardPage() {
   const applyPreset = (from: string, to: string) => {
     setFromDate(from);
     setToDate(to);
+  };
+
+  const checkboxRowStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "7px 8px",
+    borderRadius: "8px",
+    fontSize: "13px",
+    color: "#1e293b",
+    cursor: "pointer",
   };
 
   return (
@@ -212,48 +237,90 @@ export default function DashboardPage() {
           </div>
 
           {/* Station selector */}
-          {!stationsLoading && (
-            <div style={{ marginTop: "20px" }}>
-              <label style={labelStyle}>Stations — {selectedIds.length} of {stations.length} selected</label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "8px" }}>
-                <button
-                  onClick={() => setSelectedIds(stations.map((s) => s.id))}
-                  style={{ ...chipBtn, backgroundColor: "#f1f5f9", color: "#64748b" }}
-                >All</button>
-                <button
-                  onClick={() => setSelectedIds(stations.filter((s) => s.source === "purpleair").map((s) => s.id))}
-                  style={{ ...chipBtn, backgroundColor: "#f1f5f9", color: "#64748b" }}
-                >PurpleAir only</button>
-                <button
-                  onClick={() => setSelectedIds(stations.filter((s) => s.source === "iqair").map((s) => s.id))}
-                  style={{ ...chipBtn, backgroundColor: "#f1f5f9", color: "#64748b" }}
-                >IQAir only</button>
-                <button
-  onClick={() => setSelectedIds([])}
-  style={{ ...chipBtn, backgroundColor: "#f1f5f9", color: "#64748b" }}
->None</button>
-                {stations.map((s) => {
-                  const active = selectedIds.includes(s.id);
-                  const accent = s.source === "purpleair" ? "#a855f7" : "#3b82f6";
-                  return (
-                    <button
-                      key={s.id}
-                      onClick={() => toggleStation(s.id)}
-                      style={{
-                        ...chipBtn,
-                        backgroundColor: active ? accent + "18" : "#f8fafc",
-                        borderColor: active ? accent : "#e2e8f0",
-                        color: active ? accent : "#94a3b8",
-                      }}
-                    >
-                      <span style={{ fontSize: "9px", opacity: 0.7, marginRight: "4px" }}>{s.source === "purpleair" ? "PA" : "IQ"}</span>
-                      {s.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          {/* Station selector */}
+{!stationsLoading && (
+  <div style={{ marginTop: "20px", position: "relative" }} ref={dropdownRef}>
+    <label style={labelStyle}>Stations</label>
+    <button
+      onClick={() => setDropdownOpen((o) => !o)}
+      style={{
+        ...inputStyle,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        minWidth: "260px",
+        cursor: "pointer",
+      }}
+    >
+      <span>{selectedIds.length} of {stations.length} selected</span>
+      <span style={{ fontSize: "10px", color: "#94a3b8", marginLeft: "8px" }}>
+        {dropdownOpen ? "▲" : "▼"}
+      </span>
+    </button>
+
+    {dropdownOpen && (
+      <div
+        style={{
+          position: "absolute",
+          top: "calc(100% + 6px)",
+          left: 0,
+          zIndex: 100,
+          backgroundColor: "#ffffff",
+          border: "1px solid #e2e8f0",
+          borderRadius: "12px",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          padding: "10px",
+          minWidth: "260px",
+          maxHeight: "320px",
+          overflowY: "auto",
+        }}
+      >
+        {/* All / None */}
+        <label style={checkboxRowStyle}>
+          <input
+            type="checkbox"
+            checked={selectedIds.length === stations.length}
+            onChange={(e) =>
+              setSelectedIds(e.target.checked ? stations.map((s) => s.id) : [])
+            }
+          />
+          <span style={{ fontWeight: "600" }}>All</span>
+        </label>
+        <label style={checkboxRowStyle}>
+          <input
+            type="checkbox"
+            checked={selectedIds.length === 0}
+            onChange={(e) => {
+              if (e.target.checked) setSelectedIds([]);
+            }}
+          />
+          <span style={{ fontWeight: "600" }}>None</span>
+        </label>
+
+        <div style={{ height: "1px", backgroundColor: "#e2e8f0", margin: "6px 0" }} />
+
+        {/* Individual stations */}
+        {stations.map((s) => {
+          const active = selectedIds.includes(s.id);
+          const accent = s.source === "purpleair" ? "#a855f7" : "#3b82f6";
+          return (
+            <label key={s.id} style={checkboxRowStyle}>
+              <input
+                type="checkbox"
+                checked={active}
+                onChange={() => toggleStation(s.id)}
+              />
+              <span style={{ fontSize: "9px", opacity: 0.7, color: accent, fontWeight: "700" }}>
+                {s.source === "purpleair" ? "PA" : "IQ"}
+              </span>
+              <span>{s.name}</span>
+            </label>
+          );
+        })}
+      </div>
+    )}
+  </div>
+)}
         </section>
 
         {error && (
