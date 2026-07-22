@@ -50,7 +50,7 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
   return (
     <div style={card}>
       <div style={cardHeader}>
-        <h2 style={cardTitle}>{metricLabel} — Over Time</h2>
+        <h2 style={cardTitle}>Air Quality Index Over Time</h2>
         <span style={badge}>{readings.length.toLocaleString()} readings</span>
       </div>
 
