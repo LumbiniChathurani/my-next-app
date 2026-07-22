@@ -365,26 +365,10 @@ const dropdownRef = useRef<HTMLDivElement>(null);
               period={period}
             />
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
-              <PieChartPanel readings={readings} />
-              <BarChartPanel readings={readings} metric={metric} metricLabel={METRIC_LABELS[metric]} />
-            </div>
-
-            {period !== "1day" && (
-              <HeatmapPanel readings={readings} metric={metric} metricLabel={METRIC_LABELS[metric]} />
-            )}
-          </>
-        ) : !loading && (
-          <div style={{ height: "220px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", border: "2px dashed #e2e8f0", borderRadius: "16px", color: "#cbd5e1", gap: "8px" }}>
-            <span style={{ fontSize: "32px" }}>🌬</span>
-            <span style={{ fontSize: "14px" }}>Select stations and a date range, then click Apply</span>
-          </div>
-        )}
-
-        {/* ── AQI legend ── */}
+            {/* ── AQI legend ── */}
         <div style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "20px", border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-          <p style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: "600", margin: "0 0 12px 0" }}>US EPA AQI Scale</p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          <p style={{ fontSize: "11px", color: "#0f172a", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: "600", margin: "0 0 12px 0" }}>US EPA AQI Scale</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginLeft: "150px" }}>
             {[
               { range: "0–50",    label: "Good",                   color: "#16a34a" },
               { range: "51–100",  label: "Moderate",               color: "#ca8a04" },
@@ -401,6 +385,24 @@ const dropdownRef = useRef<HTMLDivElement>(null);
           </div>
         </div>
 
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+              <PieChartPanel readings={readings} />
+              <BarChartPanel readings={readings} metric={metric} metricLabel={METRIC_LABELS[metric]} />
+            </div>
+
+            {period !== "1day" && (
+              <HeatmapPanel readings={readings} metric={metric} metricLabel={METRIC_LABELS[metric]} />
+            )}
+          </>
+        ) : !loading && (
+          <div style={{ height: "220px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", border: "2px dashed #e2e8f0", borderRadius: "16px", color: "#cbd5e1", gap: "8px" }}>
+            <span style={{ fontSize: "32px" }}>🌬</span>
+            <span style={{ fontSize: "14px" }}>Select stations and a date range, then click Apply</span>
+          </div>
+        )}
+
+        
       </main>
     </div>
   );
