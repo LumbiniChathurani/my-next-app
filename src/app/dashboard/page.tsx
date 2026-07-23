@@ -408,10 +408,17 @@ const labelStyle: React.CSSProperties = {
 };
 
 const inputStyle: React.CSSProperties = {
-  backgroundColor: "#f8fafc", border: "1px solid #e2e8f0",
-  borderRadius: "10px", padding: "9px 14px",
-  fontSize: "13px", color: "#1e293b",
+  background: "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(241,245,249,0.6) 100%)",
+  border: "1px solid rgba(148,163,184,0.45)",
+  borderRadius: "10px",
+  padding: "9px 14px",
+  fontSize: "13px",
+  color: "#1e293b",
   outline: "none",
+  boxShadow: "inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 2px rgba(0,0,0,0.05), 0 4px 12px rgba(15,23,42,0.14), 0 1px 3px rgba(15,23,42,0.1)",
+  backdropFilter: "blur(10px) saturate(180%)",
+  WebkitBackdropFilter: "blur(10px) saturate(180%)",
+  transition: "all 0.2s ease",
 };
 
 // ── Liquid glass card ──────────────────────────────────────────────────────────
