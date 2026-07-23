@@ -156,22 +156,17 @@ const dropdownRef = useRef<HTMLDivElement>(null);
 <div style={{ minHeight: "100vh", backgroundColor: "#f1f5f9", color: "#1e293b", fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* ── Top bar ── */}
-      <header style={{ borderBottom: "1px solid #e2e8f0", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, backgroundColor: "#ffffff", zIndex: 50, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+      <header style={{ borderBottom: "1px solid #e2e8f0", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, backgroundColor: "rgba(255,255,255,0.7)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", zIndex: 50, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
           <span style={{ fontWeight: "700", fontSize: "15px", letterSpacing: "0.02em", color: "#0f172a" }}>Sri Lanka Air Quality</span>
         </div>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ display: "flex", gap: "8px", padding: "4px", borderRadius: "999px", background: "rgba(255,255,255,0.55)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", border: "1px solid rgba(148,163,184,0.35)", boxShadow: "inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 2px rgba(0,0,0,0.06), 0 4px 14px rgba(15,23,42,0.14), 0 1px 3px rgba(15,23,42,0.1)" }}>
           {(["10min", "1hour", "1day"] as Period[]).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              style={{
-                padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: "600", border: "none", cursor: "pointer",
-                backgroundColor: period === p ? "#3b82f6" : "#f1f5f9",
-                color: period === p ? "#fff" : "#64748b",
-                transition: "all 0.15s",
-              }}
+              style={glassPillBtn(period === p)}
             >{PERIOD_LABELS[p]}</button>
           ))}
         </div>
@@ -180,7 +175,7 @@ const dropdownRef = useRef<HTMLDivElement>(null);
       <main style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", display: "flex", flexDirection: "column", gap: "28px" }}>
 
         {/* ── Controls ── */}
-        <section style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "24px", border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+        <section style={{ ...glassCard, padding: "24px", position: "relative", zIndex: 60 }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-end" }}>
 
             {/* Date presets */}
@@ -191,12 +186,7 @@ const dropdownRef = useRef<HTMLDivElement>(null);
                   <button
                     key={p.label}
                     onClick={() => applyPreset(p.from, p.to)}
-                    style={{
-                      ...outlineBtn,
-                      backgroundColor: fromDate === p.from && toDate === p.to ? "#eff6ff" : "transparent",
-                      borderColor: fromDate === p.from && toDate === p.to ? "#3b82f6" : "#e2e8f0",
-                      color: fromDate === p.from && toDate === p.to ? "#2563eb" : "#64748b",
-                    }}
+                    style={glassChip(fromDate === p.from && toDate === p.to)}
                   >{p.label}</button>
                 ))}
               </div>
@@ -225,13 +215,13 @@ const dropdownRef = useRef<HTMLDivElement>(null);
             <button
               onClick={fetchData}
               disabled={loading}
-              style={{ ...primaryBtn, opacity: loading ? 0.6 : 1, cursor: loading ? "not-allowed" : "pointer" }}
+              style={{ ...glassPrimaryBtn, opacity: loading ? 0.6 : 1, cursor: loading ? "not-allowed" : "pointer" }}
             >{loading ? "Loading..." : "Apply"}</button>
 
             {readings.length > 0 && (
               <button
                 onClick={() => exportCSV(readings, metric, period, selectedStationNames, fromDate, toDate)}
-                style={outlineBtn}
+                style={glassChip(false)}
               >↓ Export CSV</button>
             )}
           </div>
@@ -244,12 +234,11 @@ const dropdownRef = useRef<HTMLDivElement>(null);
     <button
       onClick={() => setDropdownOpen((o) => !o)}
       style={{
-        ...inputStyle,
+        ...glassDropdownTrigger,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         minWidth: "260px",
-        cursor: "pointer",
       }}
     >
       <span>{selectedIds.length} of {stations.length} selected</span>
@@ -265,10 +254,12 @@ const dropdownRef = useRef<HTMLDivElement>(null);
           top: "calc(100% + 6px)",
           left: 0,
           zIndex: 100,
-          backgroundColor: "#ffffff",
-          border: "1px solid #e2e8f0",
-          borderRadius: "12px",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          backgroundColor: "rgba(255,255,255,0.65)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          border: "1px solid rgba(255,255,255,0.7)",
+          borderRadius: "16px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.14), inset 0 1px 1px rgba(255,255,255,0.9)",
           padding: "10px",
           minWidth: "260px",
           maxHeight: "320px",
@@ -297,7 +288,7 @@ const dropdownRef = useRef<HTMLDivElement>(null);
           <span style={{ fontWeight: "600" }}>None</span>
         </label>
 
-        <div style={{ height: "1px", backgroundColor: "#e2e8f0", margin: "6px 0" }} />
+        <div style={{ height: "1px", backgroundColor: "rgba(226,232,240,0.8)", margin: "6px 0" }} />
 
         {/* Individual stations */}
         {stations.map((s) => {
@@ -341,7 +332,7 @@ const dropdownRef = useRef<HTMLDivElement>(null);
               const color = typeof value === "number" && label !== "Total readings"
                 ? getAQIColor(value) : "#64748b";
               return (
-                <div key={label} style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "24px", border: "1px solid #e2e8f0", textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                <div key={label} style={{ ...glassCard, padding: "24px", textAlign: "center" }}>
                   <p style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: "600", margin: "0 0 10px 0" }}>{label}</p>
                   <p style={{ fontSize: "36px", fontWeight: "800", color, margin: 0, lineHeight: 1 }}>
                     {value ?? "—"}
@@ -366,7 +357,7 @@ const dropdownRef = useRef<HTMLDivElement>(null);
             />
 
             {/* ── AQI legend ── */}
-        <div style={{ backgroundColor: "#ffffff", borderRadius: "16px", padding: "20px", border: "1px solid #e2e8f0", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+        <div style={{ ...glassCard, padding: "20px" }}>
           <p style={{ fontSize: "11px", color: "#0f172a", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: "600", margin: "0 0 12px 0" }}>US EPA AQI Scale</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginLeft: "150px" }}>
             {[
@@ -423,23 +414,91 @@ const inputStyle: React.CSSProperties = {
   outline: "none",
 };
 
-const primaryBtn: React.CSSProperties = {
-  backgroundColor: "#3b82f6", color: "#fff",
-  border: "none", borderRadius: "10px",
-  padding: "10px 24px", fontSize: "13px",
-  fontWeight: "600", cursor: "pointer",
+// ── Liquid glass card ──────────────────────────────────────────────────────────
+// Same frosted-surface logic as the buttons: a translucent tinted fill, a soft
+// top highlight to suggest curvature, and a real outer shadow with a tight
+// contact layer so the card visibly lifts off the page background.
+
+const glassCard: React.CSSProperties = {
+  background: "linear-gradient(165deg, rgba(255,255,255,0.85) 0%, rgba(241,245,249,0.65) 100%)",
+  borderRadius: "16px",
+  border: "1px solid rgba(148,163,184,0.35)",
+  backdropFilter: "blur(16px) saturate(180%)",
+  WebkitBackdropFilter: "blur(16px) saturate(180%)",
+  boxShadow: "inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 2px rgba(0,0,0,0.04), 0 12px 28px rgba(15,23,42,0.12), 0 2px 6px rgba(15,23,42,0.1)",
 };
 
-const outlineBtn: React.CSSProperties = {
-  backgroundColor: "transparent", color: "#64748b",
-  border: "1px solid #e2e8f0", borderRadius: "10px",
-  padding: "9px 16px", fontSize: "12px",
-  fontWeight: "500", cursor: "pointer",
+// ── Liquid glass button system ────────────────────────────────────────────────
+// Frosted, translucent surfaces with a soft top highlight and a faint inner
+// shadow along the bottom edge, mimicking light passing through curved glass.
+
+function glassPillBtn(active: boolean): React.CSSProperties {
+  return {
+    padding: "6px 16px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: 600,
+    border: active ? "1px solid rgba(37,99,235,0.55)" : "1px solid rgba(148,163,184,0.3)",
+    cursor: "pointer",
+    color: active ? "#1d4ed8" : "#475569",
+    background: active
+      ? "linear-gradient(180deg, rgba(147,197,253,0.65) 0%, rgba(37,99,235,0.5) 100%)"
+      : "rgba(255,255,255,0.3)",
+    boxShadow: active
+      ? "inset 0 1px 1px rgba(255,255,255,0.8), inset 0 -1px 2px rgba(30,64,175,0.3), 0 4px 12px rgba(37,99,235,0.35), 0 1px 3px rgba(15,23,42,0.15)"
+      : "0 1px 3px rgba(15,23,42,0.1)",
+    backdropFilter: "blur(6px)",
+    WebkitBackdropFilter: "blur(6px)",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+  };
+}
+
+function glassChip(active: boolean): React.CSSProperties {
+  return {
+    padding: "9px 16px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: 500,
+    cursor: "pointer",
+    color: active ? "#2563eb" : "#334155",
+    background: active
+      ? "linear-gradient(180deg, rgba(219,234,254,0.9) 0%, rgba(147,197,253,0.6) 100%)"
+      : "linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(241,245,249,0.55) 100%)",
+    border: active ? "1px solid rgba(37,99,235,0.5)" : "1px solid rgba(148,163,184,0.45)",
+    boxShadow: active
+      ? "inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 2px rgba(37,99,235,0.2), 0 6px 16px rgba(37,99,235,0.25), 0 1px 3px rgba(15,23,42,0.12)"
+      : "inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 2px rgba(0,0,0,0.05), 0 4px 12px rgba(15,23,42,0.14), 0 1px 3px rgba(15,23,42,0.1)",
+    backdropFilter: "blur(10px) saturate(180%)",
+    WebkitBackdropFilter: "blur(10px) saturate(180%)",
+    transition: "all 0.2s ease",
+  };
+}
+
+const glassPrimaryBtn: React.CSSProperties = {
+  padding: "10px 26px",
+  borderRadius: "999px",
+  fontSize: "13px",
+  fontWeight: 600,
+  color: "#ffffff",
+  border: "1px solid rgba(255,255,255,0.35)",
+  background: "linear-gradient(180deg, rgba(96,165,250,0.95) 0%, rgba(37,99,235,0.95) 100%)",
+  boxShadow: "inset 0 1px 1px rgba(255,255,255,0.55), inset 0 -2px 3px rgba(29,78,216,0.4), 0 8px 20px rgba(37,99,235,0.45), 0 2px 5px rgba(15,23,42,0.2)",
+  backdropFilter: "blur(10px)",
+  WebkitBackdropFilter: "blur(10px)",
+  transition: "all 0.2s ease",
 };
 
-const chipBtn: React.CSSProperties = {
-  padding: "5px 12px", borderRadius: "8px",
-  fontSize: "12px", fontWeight: "500",
-  border: "1px solid #e2e8f0", cursor: "pointer",
-  transition: "all 0.15s",
+const glassDropdownTrigger: React.CSSProperties = {
+  background: "linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(241,245,249,0.6) 100%)",
+  border: "1px solid rgba(148,163,184,0.45)",
+  borderRadius: "14px",
+  padding: "9px 14px",
+  fontSize: "13px",
+  color: "#1e293b",
+  cursor: "pointer",
+  outline: "none",
+  boxShadow: "inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 2px rgba(0,0,0,0.05), 0 4px 12px rgba(15,23,42,0.14), 0 1px 3px rgba(15,23,42,0.1)",
+  backdropFilter: "blur(10px) saturate(180%)",
+  WebkitBackdropFilter: "blur(10px) saturate(180%)",
+  transition: "all 0.2s ease",
 };
