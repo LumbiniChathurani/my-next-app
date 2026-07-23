@@ -153,7 +153,7 @@ const dropdownRef = useRef<HTMLDivElement>(null);
   };
 
   return (
-    <div style={{ minHeight: "100vh", backgroundColor: "#f1f5f9", color: "#1e293b", fontFamily: "'Inter', system-ui, sans-serif" }}>
+<div style={{ minHeight: "100vh", backgroundColor: "#f1f5f9", color: "#1e293b", fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* ── Top bar ── */}
       <header style={{ borderBottom: "1px solid #e2e8f0", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, backgroundColor: "#ffffff", zIndex: 50, boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>

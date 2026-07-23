@@ -12,21 +12,20 @@ async function calculateDailyAverage() {
 
   console.log("Daily averages inserted:", data);
 
-// 2. Clear temp table
-const twoWeeksAgo = new Date();
-twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+  // 2. Clear temp table (older than 7 days)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-const { error: deleteError } = await supabase
-  .from("aq_hourly_temp")
-  .delete()
-  .lt("timestamp", twoWeeksAgo.toISOString());
+  const { error: deleteError } = await supabase
+    .from("aq_hourly_temp")
+    .delete()
+    .lt("timestamp", sevenDaysAgo.toISOString());
 
-if (deleteError) {
-  console.error("Error clearing temp table:", deleteError);
-} else {
-  console.log("Temp table cleared");
-}
-
+  if (deleteError) {
+    console.error("Error clearing temp table:", deleteError);
+  } else {
+    console.log("Temp table cleared");
+  }
 }
 
 calculateDailyAverage();
