@@ -175,7 +175,7 @@ const dropdownRef = useRef<HTMLDivElement>(null);
       <main style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 24px", display: "flex", flexDirection: "column", gap: "28px" }}>
 
         {/* ── Controls ── */}
-        <section style={{ ...glassCard, padding: "24px", position: "relative", zIndex: 60 }}>
+        <section style={{ ...glassCard, padding: "24px", position: "relative", zIndex: 10 }}>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", alignItems: "flex-end" }}>
 
             {/* Date presets */}
