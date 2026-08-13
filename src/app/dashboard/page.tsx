@@ -362,7 +362,7 @@ const dropdownRef = useRef<HTMLDivElement>(null);
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginLeft: "150px" }}>
             {[
               { range: "0–50",    label: "Good",                   color: "#16a34a" },
-              { range: "51–100",  label: "Moderate",               color: "#ca8a04" },
+              { range: "51–100",  label: "Moderate",               color: "#facc15" },
               { range: "101–150", label: "Unhealthy (Sensitive)",  color: "#ea580c" },
               { range: "151–200", label: "Unhealthy",              color: "#dc2626" },
               { range: "201–300", label: "Very Unhealthy",         color: "#9333ea" },

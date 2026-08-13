@@ -54,11 +54,11 @@ export default function AQIChart({ data }: Props) {
 
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
-          <ReferenceArea y1={0} y2={50} fill="#16a34a" fillOpacity={0.3} />
-          <ReferenceArea y1={50} y2={100} fill="#fde047" fillOpacity={0.3} />
-          <ReferenceArea y1={100} y2={150} fill="#f97316" fillOpacity={0.3} />
-          <ReferenceArea y1={150} y2={200} fill="#dc2626" fillOpacity={0.3} />
-          <ReferenceArea y1={200} y2={300} fill="#7e22ce" fillOpacity={0.3} />
+        <ReferenceArea y1={0} y2={50} fill="#16a34a" fillOpacity={0.3} />
+<ReferenceArea y1={50} y2={100} fill="#facc15" fillOpacity={0.3} />
+<ReferenceArea y1={100} y2={150} fill="#f97316" fillOpacity={0.3} />
+<ReferenceArea y1={150} y2={200} fill="#dc2626" fillOpacity={0.3} />
+<ReferenceArea y1={200} y2={300} fill="#7e22ce" fillOpacity={0.3} />
 
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" />
