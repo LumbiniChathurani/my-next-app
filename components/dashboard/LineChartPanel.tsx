@@ -57,11 +57,11 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
       <ResponsiveContainer width="100%" height={320}>
         <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
           {showAQIBands && <>
-            <ReferenceArea y1={0}   y2={50}  fill="#a9f5ae"  />
-            <ReferenceArea y1={50}  y2={100} fill="#fff44f"  />
-            <ReferenceArea y1={100} y2={150} fill="#f97316"  />
-            <ReferenceArea y1={150} y2={200} fill="#ef4444"  />
-            <ReferenceArea y1={200} y2={300} fill="#a855f7" />
+            <ReferenceArea y1={0}   y2={50}  fill="#a9f5ae"  fillOpacity={0.2}/>
+            <ReferenceArea y1={50}  y2={100} fill="#fff44f"  fillOpacity={0.2}/>
+            <ReferenceArea y1={100} y2={150} fill="#f97316"  fillOpacity={0.2}/>
+            <ReferenceArea y1={150} y2={200} fill="#ef4444"  fillOpacity={0.2}/>
+            <ReferenceArea y1={200} y2={300} fill="#a855f7" fillOpacity={0.2}/>
           </>}
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis
