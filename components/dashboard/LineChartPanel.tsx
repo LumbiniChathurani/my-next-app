@@ -57,7 +57,7 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
       <ResponsiveContainer width="100%" height={320}>
         <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
           {showAQIBands && <>
-            <ReferenceArea y1={0}   y2={50}  fill="#22c55e" fillOpacity={0.08} />
+            <ReferenceArea y1={0}   y2={50}  fill="#a9f5ae"  />
             <ReferenceArea y1={50}  y2={100} fill="#fff44f"  />
             <ReferenceArea y1={100} y2={150} fill="#f97316" fillOpacity={0.08} />
             <ReferenceArea y1={150} y2={200} fill="#ef4444" fillOpacity={0.08} />
