@@ -59,9 +59,9 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
           {showAQIBands && <>
             <ReferenceArea y1={0}   y2={50}  fill="#a9f5ae"  />
             <ReferenceArea y1={50}  y2={100} fill="#fff44f"  />
-            <ReferenceArea y1={100} y2={150} fill="#f97316" fillOpacity={0.08} />
-            <ReferenceArea y1={150} y2={200} fill="#ef4444" fillOpacity={0.08} />
-            <ReferenceArea y1={200} y2={300} fill="#a855f7" fillOpacity={0.08} />
+            <ReferenceArea y1={100} y2={150} fill="#f97316"  />
+            <ReferenceArea y1={150} y2={200} fill="#ef4444"  />
+            <ReferenceArea y1={200} y2={300} fill="#a855f7" />
           </>}
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis
@@ -72,6 +72,7 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
             tickLine={false}
           />
           <YAxis
+            domain={[0, 300]}
             tick={{ fill: "#64748b", fontSize: 11 }}
             axisLine={{ stroke: "#e2e8f0" }}
             tickLine={false}
