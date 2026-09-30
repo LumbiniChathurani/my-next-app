@@ -21,6 +21,17 @@ const PALETTE = [
   "#fbbf24","#60a5fa","#c084fc","#4ade80","#f87171","#a3e635",
 ];
 
+// ── AQI band settings (edit these to change colours / ranges) ──
+const AQI_BANDS = [
+  { from: 0,   to: 50,  color: "#a9f5ae" },
+  { from: 50,  to: 100, color: "#fff44f" },
+  { from: 100, to: 150, color: "#f97316" },
+  { from: 150, to: 200, color: "#ef4444" },
+  { from: 200, to: 300, color: "#a855f7" },
+  { from: 300, to: 500, color: "#7f1d1d" }, // hazardous
+];
+const BAND_OPACITY = 0.2;
+
 function formatTimestamp(ts: string, period: Period): string {
   try {
     const d = new Date(ts);
@@ -31,7 +42,7 @@ function formatTimestamp(ts: string, period: Period): string {
 }
 
 export default function LineChartPanel({ readings, metric, metricLabel, period }: Props) {
-  const { chartData, stationNames } = useMemo(() => {
+  const { chartData, stationNames, maxValue } = useMemo(() => {
     const names = Array.from(new Set(readings.map((r) => r.station_name)));
     const byTs: Record<string, Record<string, number | null>> = {};
     for (const r of readings) {
@@ -42,10 +53,19 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
     const data = Object.values(byTs).sort((a, b) =>
       new Date(a.__ts as any).getTime() - new Date(b.__ts as any).getTime()
     );
-    return { chartData: data, stationNames: names };
+    let maxValue = 0;
+    for (const r of readings) {
+      const v = r[metric] as number | null;
+      if (typeof v === "number" && v > maxValue) maxValue = v;
+    }
+    return { chartData: data, stationNames: names, maxValue };
   }, [readings, metric]);
 
   const showAQIBands = metric === "aqi_overall";
+  const visibleBands = AQI_BANDS.filter((b) => b.from < maxValue);
+const yMax = showAQIBands
+  ? (visibleBands.length ? visibleBands[visibleBands.length - 1].to : AQI_BANDS[0].to)
+  : "auto";
 
   return (
     <div style={card}>
@@ -56,13 +76,9 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
 
       <ResponsiveContainer width="100%" height={320}>
         <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-          {showAQIBands && <>
-            <ReferenceArea y1={0}   y2={50}  fill="#a9f5ae"  fillOpacity={0.2}/>
-            <ReferenceArea y1={50}  y2={100} fill="#fff44f"  fillOpacity={0.2}/>
-            <ReferenceArea y1={100} y2={150} fill="#f97316"  fillOpacity={0.2}/>
-            <ReferenceArea y1={150} y2={200} fill="#ef4444"  fillOpacity={0.2}/>
-            <ReferenceArea y1={200} y2={300} fill="#a855f7" fillOpacity={0.2}/>
-          </>}
+        {showAQIBands && visibleBands.map((b) => (
+  <ReferenceArea key={b.from} y1={b.from} y2={b.to} fill={b.color} fillOpacity={BAND_OPACITY} />
+))}
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis
             dataKey="__ts"
@@ -72,7 +88,7 @@ export default function LineChartPanel({ readings, metric, metricLabel, period }
             tickLine={false}
           />
           <YAxis
-            domain={[0, 300]}
+            domain={[0, yMax]}
             tick={{ fill: "#64748b", fontSize: 11 }}
             axisLine={{ stroke: "#e2e8f0" }}
             tickLine={false}
