@@ -30,7 +30,8 @@ export function lastNDates(n = 7): string[] {
   const today = new Date().toLocaleDateString("en-CA", { timeZone: TIMEZONE });
   const base = new Date(today + "T00:00:00Z");
   const out: string[] = [];
-  for (let i = n - 1; i >= 0; i--) {
+  // Start at 1 (yesterday), not 0 (today): today's daily row is still incomplete
+  for (let i = n; i >= 1; i--) {
     const d = new Date(base);
     d.setUTCDate(d.getUTCDate() - i);
     out.push(d.toISOString().slice(0, 10));
