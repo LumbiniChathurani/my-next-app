@@ -131,8 +131,8 @@ export async function fetchDailyLast7Days(): Promise<DailyResult> {
     row.days[key] = { ...(row.days[key] ?? { aqi: null, category: null }), pm25: r.pm25 ?? null };
   }
 
-  // Only keep stations that have at least one reading in the window
-  const rows = [...rowMap.values()].filter((r) => Object.keys(r.days).length > 0);
+  // Return every station (stations with no readings show as grey "-" cells)
+  const rows = [...rowMap.values()];
 
   return { dates, rows, errors };
 }
