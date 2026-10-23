@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toPng } from "html-to-image";
 import { fetchDailyLast7Days, getAQILabel, type DailyResult, type DailyRow } from "../lib/Dailyaq";
 import {
   adminSignIn,
@@ -118,6 +119,11 @@ export default function DailyAQITable() {
   const [loading, setLoading] = useState(true);
   const [fatalError, setFatalError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+
+  // Image download (available to everyone)
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   // Selection saved by the admin (null = nothing saved yet -> automatic default)
   const [savedIds, setSavedIds] = useState<number[] | null>(null);
@@ -290,6 +296,28 @@ export default function DailyAQITable() {
     }
   }
 
+  async function downloadImage() {
+    if (!cardRef.current || !data) return;
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      const dataUrl = await toPng(cardRef.current, {
+        pixelRatio: 2, // sharper image
+        backgroundColor: "#ffffff",
+        cacheBust: true,
+      });
+      const link = document.createElement("a");
+      link.download = `daily-aqi-${data.dates[0]}_to_${data.dates[data.dates.length - 1]}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (e: any) {
+      setDownloadError("Couldn't create the image. Please try again.");
+      console.error("Image download failed", e);
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setAdminMsg(null);
@@ -431,8 +459,17 @@ export default function DailyAQITable() {
             <button onClick={load} className="underline">
               Refresh now
             </button>
+            <button
+              onClick={downloadImage}
+              disabled={downloading || stations.length === 0}
+              className="rounded border border-gray-300 bg-white px-3 py-1 text-gray-900 disabled:opacity-50"
+            >
+              {downloading ? "Preparing..." : "Download image"}
+            </button>
           </div>
         </div>
+
+        {downloadError && <p className="mb-3 text-sm text-red-600">{downloadError}</p>}
 
         {adminMsg && <p className="mb-3 text-sm text-gray-700">{adminMsg}</p>}
 
@@ -454,8 +491,13 @@ export default function DailyAQITable() {
           </p>
         )}
 
-        {/* px-12 leaves room for the last rotated station name and keeps the table visually centered */}
-        <div className="overflow-x-auto px-12 pt-2">
+        {/* The AQ card: this block (table + legend) is what "Download image" captures.
+            The side padding leaves room for the last rotated station name. */}
+        <div className="overflow-x-auto">
+          <div
+            ref={cardRef}
+            style={{ display: "inline-block", background: "#fff", color: "#000", padding: "8px 56px 16px 56px" }}
+          >
           <table style={{ borderCollapse: "collapse" }}>
             <thead>
               <tr>
@@ -524,9 +566,12 @@ export default function DailyAQITable() {
               </tr>
             </tbody>
           </table>
-        </div>
 
-        <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs">
+          {/* maxWidth 0 + minWidth 100% keeps the legend as wide as the table, never wider */}
+          <div
+            className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs"
+            style={{ maxWidth: 0, minWidth: "100%" }}
+          >
           {LEGEND.map((l) => (
             <span key={l.label} className="flex items-center gap-1">
               <span
@@ -540,6 +585,8 @@ export default function DailyAQITable() {
             <span className="inline-block h-3 w-3 border border-black" style={{ backgroundColor: "#a6a6a6" }} />
             No data
           </span>
+          </div>
+          </div>
         </div>
 
         {/* Admin login: only appears when the page is opened with ?admin in the address */}
