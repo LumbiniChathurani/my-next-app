@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import { fetchDailyLast7Days, getAQILabel, type DailyResult, type DailyRow } from "../lib/Dailyaq";
+import {
+  fetchDailyLast7Days,
+  fetchDailyRange,
+  getAQILabel,
+  lastNDates,
+  type DailyResult,
+  type DailyRow,
+} from "../lib/Dailyaq";
 import {
   adminSignIn,
   adminSignOut,
@@ -124,6 +131,12 @@ export default function DailyAQITable() {
   const cardRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  // CSV download (available to everyone). Empty date = use the table's current range.
+  const [csvFrom, setCsvFrom] = useState("");
+  const [csvTo, setCsvTo] = useState("");
+  const [csvBusy, setCsvBusy] = useState(false);
+  const [csvError, setCsvError] = useState<string | null>(null);
 
   // Selection saved by the admin (null = nothing saved yet -> automatic default)
   const [savedIds, setSavedIds] = useState<number[] | null>(null);
@@ -337,6 +350,60 @@ export default function DailyAQITable() {
 
   const { stations, daily, weekly } = computed;
 
+  async function downloadCsv() {
+    if (!data) return;
+    const from = csvFrom || data.dates[0];
+    const to = csvTo || data.dates[data.dates.length - 1];
+
+    if (from > to) {
+      setCsvError("The start date must be on or before the end date.");
+      return;
+    }
+    if ((Date.parse(to) - Date.parse(from)) / 86400000 > 366) {
+      setCsvError("Please choose a range of 366 days or less.");
+      return;
+    }
+
+    setCsvBusy(true);
+    setCsvError(null);
+    try {
+      // Same stations, order and names as shown in the table
+      const result = await fetchDailyRange(from, to, stations.map((s) => s.stationId));
+      const byId = new Map(result.rows.map((r) => [r.stationId, r]));
+      const cols = stations.map((s) => ({ name: nameOf(s), row: byId.get(s.stationId) }));
+
+      const esc = (v: string) => (/[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+      const lines: string[][] = [["Date", ...cols.map((c) => c.name), "Daily AQI"]];
+
+      for (const d of result.dates) {
+        const vals = cols.map((c) => c.row?.days[d]?.aqi ?? null);
+        const avg = average(vals.filter((v): v is number => v != null));
+        lines.push([
+          d,
+          ...vals.map((v) => (v == null ? "" : String(Math.round(v)))),
+          avg == null ? "" : String(avg),
+        ]);
+      }
+
+      // BOM so Excel opens the file with the right characters
+      const csv = "\uFEFF" + lines.map((l) => l.map(esc).join(",")).join("\r\n");
+      const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `daily-aqi_${from}_to_${to}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      if (result.errors.length > 0) {
+        setCsvError(`Downloaded, but some data may be missing: ${result.errors.join("; ")}`);
+      }
+    } catch (e: any) {
+      setCsvError(`Couldn't create the CSV: ${e?.message ?? "unknown error"}`);
+    } finally {
+      setCsvBusy(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-fit max-w-full">
@@ -466,6 +533,62 @@ export default function DailyAQITable() {
             >
               {downloading ? "Preparing..." : "Download image"}
             </button>
+
+            <details className="relative">
+              <summary className="cursor-pointer select-none rounded border border-gray-300 bg-white px-3 py-1 text-gray-900">
+                Download CSV
+              </summary>
+              <div className="absolute right-0 z-20 mt-1 w-72 rounded border border-gray-300 bg-white p-3 text-gray-900 shadow-lg">
+                <div className="mb-2 flex gap-3 text-xs">
+                  {[7, 30, 90].map((n) => (
+                    <button
+                      key={n}
+                      className="underline"
+                      onClick={() => {
+                        const ds = lastNDates(n);
+                        setCsvFrom(ds[0]);
+                        setCsvTo(ds[ds.length - 1]);
+                      }}
+                    >
+                      Last {n} days
+                    </button>
+                  ))}
+                </div>
+
+                <label className="mb-2 block text-xs">
+                  From
+                  <input
+                    type="date"
+                    value={csvFrom || data.dates[0]}
+                    max={lastNDates(1)[0]}
+                    onChange={(e) => setCsvFrom(e.target.value)}
+                    className="mt-1 block w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                  />
+                </label>
+                <label className="mb-3 block text-xs">
+                  To
+                  <input
+                    type="date"
+                    value={csvTo || data.dates[data.dates.length - 1]}
+                    max={lastNDates(1)[0]}
+                    onChange={(e) => setCsvTo(e.target.value)}
+                    className="mt-1 block w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                  />
+                </label>
+
+                <button
+                  onClick={downloadCsv}
+                  disabled={csvBusy || stations.length === 0}
+                  className="w-full rounded bg-gray-900 px-3 py-1 text-white disabled:opacity-50"
+                >
+                  {csvBusy ? "Preparing..." : "Download CSV"}
+                </button>
+                {csvError && <p className="mt-2 text-xs text-red-600">{csvError}</p>}
+                <p className="mt-2 text-xs text-gray-500">
+                  Includes the stations shown in the table. Up to 366 days.
+                </p>
+              </div>
+            </details>
           </div>
         </div>
 
