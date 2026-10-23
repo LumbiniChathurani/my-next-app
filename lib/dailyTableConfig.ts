@@ -4,15 +4,34 @@ const CONFIG_ID = "daily_table";
 
 // ── Shared station selection (readable by everyone, writable only by the admin) ──
 
-/** Returns the saved station ids, or null if the admin hasn't saved a selection yet. */
-export async function fetchSelectedStationIds(): Promise<number[] | null> {
+export type DailyTableConfig = {
+  /** Saved station ids, or null if the admin hasn't saved a selection yet. */
+  selectedIds: number[] | null;
+  /** Custom display names set by the admin: station id -> name. */
+  stationNames: Record<string, string>;
+};
+
+export async function fetchDailyTableConfig(): Promise<DailyTableConfig> {
   const { data, error } = await supabase_2
     .from("daily_table_config")
-    .select("selected_station_ids")
+    .select("selected_station_ids, custom_station_names")
     .eq("id", CONFIG_ID)
     .maybeSingle();
   if (error) throw error;
-  return (data?.selected_station_ids as number[] | null) ?? null;
+  return {
+    selectedIds: (data?.selected_station_ids as number[] | null) ?? null,
+    stationNames: (data?.custom_station_names as Record<string, string> | null) ?? {},
+  };
+}
+
+/** Saves the custom display names for everyone. Blank names are ignored by the caller. */
+export async function saveStationNames(names: Record<string, string>): Promise<void> {
+  const { error } = await supabase_2.from("daily_table_config").upsert({
+    id: CONFIG_ID,
+    custom_station_names: names,
+    updated_at: new Date().toISOString(),
+  });
+  if (error) throw error;
 }
 
 /** Saves the selection for everyone. Pass null to go back to the automatic default. */

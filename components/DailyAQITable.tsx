@@ -5,32 +5,35 @@ import { fetchDailyLast7Days, getAQILabel, type DailyResult, type DailyRow } fro
 import {
   adminSignIn,
   adminSignOut,
-  fetchSelectedStationIds,
+  fetchDailyTableConfig,
   saveSelectedStationIds,
+  saveStationNames,
   subscribeAdminSession,
 } from "../lib/dailyTableConfig";
 
 const REFRESH_MS = 5 * 60 * 1000; // re-fetch every 5 minutes
 
-// Column order, left to right. Names must match the "name" column in your
-// stations table (case-insensitive). Stations not listed go at the end, A-Z.
-const STATION_ORDER = [
-  "Akurana-outdoor",
-  "Digana",
-  "Nuwara Eliya",
-  "Colombo (EFIC)",
-  "Kurunegala",
-  "Minihana",
-  "Negombo",
-  "Battaramulla (CEA)",
-  "Puttalam",
-  "Chilaw (CEA)",
-  "Galle",
-  "Ambalanthota",
-  "Mannar",
-  "Trincomalee",
-  "Jaffna",
-  "Anuradhapura",
+// Column order, left to right, using the "id" column of your stations table.
+// Stations not listed here go at the end, A-Z by name.
+const STATION_ORDER_IDS = [
+  11, // fect-akurana-outdoor
+  12, // fect-digana-2
+  13, // drivegreen-nuwara-eliya
+  51, // efic-colombo
+  15, // drivegreen-kurunegala
+  6, //  drivegreen-mirihana
+  10, // drivegreen-negombo
+  16, // cea-battaramulla
+  48, // drivegreen-puttalam
+  45, // puttalam
+  20, // chilaw-divisional-secretariat-by-cea
+  49, // drivegreen-galle
+  46, // galle
+  17, // drivegreen-ambalantota
+  8, //  manthai-west-... (Mannar)
+  18, // drivegreen-trincomalee
+  19, // drivegreen-jaffna
+  5, //  drivegreen-anuradapura
 ];
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -67,8 +70,8 @@ function average(nums: number[]): number | null {
   return Math.round(nums.reduce((a, b) => a + b, 0) / nums.length);
 }
 
-function stationRank(name: string) {
-  const i = STATION_ORDER.findIndex((n) => n.toLowerCase() === name.toLowerCase());
+function stationRank(stationId: number) {
+  const i = STATION_ORDER_IDS.indexOf(stationId);
   return i === -1 ? 999 : i;
 }
 
@@ -85,9 +88,9 @@ const boxed: React.CSSProperties = {
 const bigLabel: React.CSSProperties = { fontWeight: 800, fontSize: 18, textAlign: "center" };
 
 // Hover popup text for a station/date cell: AQI, category and PM2.5
-function cellTip(s: DailyRow, d: string): string {
+function cellTip(s: DailyRow, d: string, name: string): string {
   const c = s.days[d];
-  const head = `${s.name}, ${dateLabel(d)}`;
+  const head = `${name}, ${dateLabel(d)}`;
   if (!c || c.aqi == null) return `${head}\nNo data`;
   const pm = c.pm25 != null ? `\nPM2.5: ${c.pm25.toFixed(1)} µg/m³` : "";
   return `${head}\nAQI ${Math.round(c.aqi)} (${getAQILabel(c.aqi)})${pm}`;
@@ -119,10 +122,14 @@ export default function DailyAQITable() {
   // Selection saved by the admin (null = nothing saved yet -> automatic default)
   const [savedIds, setSavedIds] = useState<number[] | null>(null);
 
+  // Custom display names saved by the admin (station id -> name)
+  const [savedNames, setSavedNames] = useState<Record<string, string>>({});
+
   // Admin-only state
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false); // login form appears only at ?admin
   const [draft, setDraft] = useState<Set<number> | null>(null); // unsaved changes
+  const [nameDraft, setNameDraft] = useState<Record<string, string> | null>(null); // unsaved name edits
   const [saving, setSaving] = useState(false);
   const [adminMsg, setAdminMsg] = useState<string | null>(null);
   const [email, setEmail] = useState("");
@@ -132,12 +139,16 @@ export default function DailyAQITable() {
     try {
       const [result, saved] = await Promise.all([
         fetchDailyLast7Days(),
-        fetchSelectedStationIds()
+        fetchDailyTableConfig()
           .then((v) => ({ ok: true as const, v }))
           .catch(() => ({ ok: false as const, v: null })),
       ]);
       setData(result);
-      if (saved.ok) setSavedIds(saved.v); // if loading the selection fails, keep the previous one
+      if (saved.ok) {
+        // if loading the settings fails, keep the previous ones
+        setSavedIds(saved.v.selectedIds);
+        setSavedNames(saved.v.stationNames);
+      }
       setFatalError(null);
       setUpdatedAt(new Date());
     } catch (e: any) {
@@ -167,7 +178,10 @@ export default function DailyAQITable() {
     setShowAdminLogin(new URLSearchParams(window.location.search).has("admin"));
     return subscribeAdminSession((signedIn) => {
       setIsAdmin(signedIn);
-      if (!signedIn) setDraft(null);
+      if (!signedIn) {
+        setDraft(null);
+        setNameDraft(null);
+      }
     });
   }, []);
 
@@ -176,7 +190,7 @@ export default function DailyAQITable() {
     () =>
       data
         ? [...data.rows].sort(
-            (a, b) => stationRank(a.name) - stationRank(b.name) || a.name.localeCompare(b.name)
+            (a, b) => stationRank(a.stationId) - stationRank(b.stationId) || a.name.localeCompare(b.name)
           )
         : [],
     [data]
@@ -250,6 +264,32 @@ export default function DailyAQITable() {
     }
   }
 
+  // Names shown in the table: the admin's unsaved edits (admin only), otherwise the saved ones.
+  // A blank custom name falls back to the actual station name.
+  const effectiveNames = isAdmin && nameDraft ? nameDraft : savedNames;
+  const nameOf = (s: DailyRow) => effectiveNames[s.stationId]?.trim() || s.name;
+
+  async function saveNames() {
+    if (!nameDraft) return;
+    setSaving(true);
+    setAdminMsg(null);
+    try {
+      // keep only non-blank names
+      const cleaned: Record<string, string> = {};
+      for (const [id, name] of Object.entries(nameDraft)) {
+        if (name.trim()) cleaned[id] = name.trim();
+      }
+      await saveStationNames(cleaned);
+      setSavedNames(cleaned);
+      setNameDraft(null);
+      setAdminMsg("Names saved. Everyone now sees these names.");
+    } catch (e: any) {
+      setAdminMsg(`Couldn't save names: ${e?.message ?? "unknown error"}`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setAdminMsg(null);
@@ -310,7 +350,12 @@ export default function DailyAQITable() {
                             checked={selectedSet.has(s.stationId)}
                             onChange={() => toggleStation(s.stationId)}
                           />
-                          <span>{s.name}</span>
+                          <span>
+                            {s.name}
+                            {effectiveNames[s.stationId]?.trim() && (
+                              <span className="text-xs text-gray-400"> → {effectiveNames[s.stationId].trim()}</span>
+                            )}
+                          </span>
                           <span className="ml-auto text-xs text-gray-400">
                             {missing > 0 && <span className="text-orange-600">{missing} empty </span>}
                             {s.source === "purpleair" ? "PurpleAir" : "IQAir"}
@@ -320,6 +365,44 @@ export default function DailyAQITable() {
                     })}
                   </div>
                 </details>
+
+                <details className="relative">
+                  <summary className="cursor-pointer select-none rounded border border-gray-300 bg-white px-3 py-1 text-gray-900">
+                    Station names
+                  </summary>
+                  <div className="absolute left-0 z-20 mt-1 max-h-96 w-96 overflow-y-auto rounded border border-gray-300 bg-white p-3 text-gray-900 shadow-lg">
+                    <p className="mb-2 text-xs text-gray-500">
+                      Type the name to show in the table. Leave blank to use the actual name.
+                    </p>
+                    {allStations.map((s) => (
+                      <div key={s.stationId} className="flex items-center gap-2 py-1">
+                        <span className="w-40 shrink-0 text-sm">{s.name}</span>
+                        <input
+                          type="text"
+                          value={effectiveNames[s.stationId] ?? ""}
+                          placeholder={s.name}
+                          onChange={(e) => setNameDraft({ ...effectiveNames, [s.stationId]: e.target.value })}
+                          className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </details>
+
+                {nameDraft && (
+                  <>
+                    <button
+                      onClick={saveNames}
+                      disabled={saving}
+                      className="rounded bg-gray-900 px-3 py-1 text-white disabled:opacity-50"
+                    >
+                      {saving ? "Saving..." : "Save names"}
+                    </button>
+                    <button onClick={() => setNameDraft(null)} disabled={saving} className="underline">
+                      Discard name changes
+                    </button>
+                  </>
+                )}
 
                 {draft && (
                   <>
@@ -353,7 +436,7 @@ export default function DailyAQITable() {
 
         {adminMsg && <p className="mb-3 text-sm text-gray-700">{adminMsg}</p>}
 
-        {isAdmin && draft && (
+        {isAdmin && (draft || nameDraft) && (
           <p className="mb-3 text-sm text-amber-800">
             Preview only. Visitors will not see these changes until you save.
           </p>
@@ -393,7 +476,7 @@ export default function DailyAQITable() {
                         textAlign: "left",
                       }}
                     >
-                      {s.name}
+                      {nameOf(s)}
                     </div>
                   </th>
                 ))}
@@ -410,7 +493,7 @@ export default function DailyAQITable() {
                 <tr key={d}>
                   <td style={{ ...boxed, background: "#fff", minWidth: 64 }}>{dateLabel(d)}</td>
                   {stations.map((s) => (
-                    <AQCell key={s.stationId} value={s.days[d]?.aqi} title={cellTip(s, d)} />
+                    <AQCell key={s.stationId} value={s.days[d]?.aqi} title={cellTip(s, d, nameOf(s))} />
                   ))}
                   <td />
                   <AQCell
@@ -435,7 +518,7 @@ export default function DailyAQITable() {
                   <AQCell
                     key={s.stationId}
                     value={weekly[s.stationId]}
-                    title={`${s.name}\n7-day average AQI: ${weekly[s.stationId] ?? "no data"}`}
+                    title={`${nameOf(s)}\n7-day average AQI: ${weekly[s.stationId] ?? "no data"}`}
                   />
                 ))}
               </tr>
